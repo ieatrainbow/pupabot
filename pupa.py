@@ -10,23 +10,22 @@ import config
 # The token that @botfather give
 bot = telebot.TeleBot(config.tbtoken)
 
-# Opening quotes
+# Opening Files
 pupa = open(f'{config.patch}/pupa_q.txt', 'r', encoding='UTF-8')
 technik = open(f'{config.patch}/technik_q.txt', 'r', encoding='UTF-8')
 
-# Opening triggers
 pupa_trig = open(f'{config.patch}/pupa_t.txt', 'r', encoding='UTF-8')
 technik_trig = open(f'{config.patch}/technik_t.txt', 'r', encoding='UTF-8')
 
-# Opening wisdom
 pupa_w = open(f'{config.patch}/pupa_w.txt', 'r', encoding='UTF-8')
+pupa_g = open(f'{config.patch}/pupa_g.txt', 'r', encoding='UTF-8')
 
-# Dividing quotes line by line
+# Dividing line by line
 pupa_quotes = pupa.read().split('\n')
 technik_quotes = technik.read().split('\n')
 pupa_wisdom = pupa_w.read().split(';')
+pupa_gena = pupa_g.read().split('\n')
 
-# Dividing triggers line by line
 pupa_triggers = pupa_trig.read().split('\n')
 technik_triggers = technik_trig.read().split('\n')
 
@@ -50,7 +49,7 @@ def handle(message):
     try:
 
         # Set the size of the random
-        rand = random.randint(1, 7)
+        rand = random.randint(1, 10)
 
         # If simple text
         if message.content_type == 'text':
@@ -74,24 +73,36 @@ def handle(message):
                 bot.send_chat_action(message.chat.id, 'upload_photo')  # show the bot "upload_photo"
                 time.sleep(3)
 
+                # Make image with quote
                 img = Image.open(f'{config.patch}/{random.randint(1, 4)}.jpg')
                 position = (320, 50)
-
                 text = random.choice(pupa_wisdom)
                 font = ImageFont.truetype(f'{config.patch}/Lobster-Regular.ttf', 38)
-
                 ImageDraw.Draw(img).multiline_text(position, text, font=font, stroke_width=2, stroke_fill=0,
                                                    anchor='ms',
                                                    align='center')
 
                 image_name_output = f'{config.patch}/wisdom.jpg'
                 img.save(image_name_output)
-
+                # Send image
                 bot.send_photo(message.chat.id, photo=open(image_name_output, 'rb'))
                 img.close()
 
-            # Random selection of a message for a reply
-            elif rand == 3:
+            # If message from specific user and random
+            elif message.from_user.id == config.gena_id and rand == 1:
+                bot.send_chat_action(message.chat.id, 'typing')
+                time.sleep(3)
+                bot.reply_to(message, random.choice(pupa_gena))
+
+            # Random choice of message to reply with a sticker
+            elif rand == 2:
+                sti = open(f'{config.patch}/stickers/{random.randint(1, 35)}.webp', 'rb')
+                bot.send_chat_action(message.chat.id, 'choose_sticker')
+                time.sleep(3)
+                bot.send_sticker(message.chat.id, sti, reply_to_message_id=message.message_id)
+
+            # Random choice of message to reply
+            elif rand in [7, 10]:
                 bot.send_chat_action(message.chat.id, 'typing')
                 time.sleep(3)
                 bot.reply_to(message, random.choice(pupa_quotes))
@@ -103,11 +114,17 @@ def handle(message):
         # If other content type
         elif message.content_type != 'text':
 
-            # Random selection of a message for a reply
-            if rand == 3:
-                bot.send_chat_action(message.chat.id, 'typing')  # show the bot "typing" (max. 5 secs)
+            # Random choice of message to reply
+            if rand == 7:
+                bot.send_chat_action(message.chat.id, 'typing')
                 time.sleep(3)
                 bot.reply_to(message, random.choice(pupa_quotes))
+
+            # If message from specific user and random
+            elif message.from_user.id == config.gena_id and rand == 1:
+                bot.send_chat_action(message.chat.id, 'typing')
+                time.sleep(3)
+                bot.reply_to(message, random.choice(pupa_gena))
 
             # Inaction if trigger words did not come
             else:
@@ -117,6 +134,7 @@ def handle(message):
             pass
 
     except Exception:
+        bot.send_message(message.chat.id, 'Im broke (help me, guys)')
         pass
 
 
