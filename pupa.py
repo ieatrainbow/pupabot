@@ -47,89 +47,97 @@ CONTENT_TYPES = ['text', 'audio', 'document', 'photo', 'sticker', 'video', 'vide
 @bot.message_handler(content_types=CONTENT_TYPES)
 def handle(message):
     try:
+        # Logging messages from user
+        if message.from_user.id == config.pupa_id and message.content_type == 'text':
+            with open(f'{config.patch}/messages_log.txt', 'a', encoding='utf-8') as f:
+                f.write(message.text)
+                f.write('\n')
+                f.close()
 
-        # Set the size of the random
-        rand = random.randint(1, 10)
+            # Set the size of the random
+            rand = random.randint(1, 10)
 
-        # If simple text
-        if message.content_type == 'text':
-            # Removing extra characters from a string
-            tg_mess = re.sub(r"[$^&()+#%!@*,.? =_'-]", "", message.text.casefold())
+            # If simple text
+            if message.content_type == 'text':
+                # Removing extra characters from a string
+                tg_mess = re.sub(r"[$^&()+#%!@*,.? =_'-]", "", message.text.casefold())
 
-            # If match with pupa_triggers
-            if tg_mess in pupa_triggers:
-                bot.send_chat_action(message.chat.id, 'typing')  # show the bot "typing" (max. 5 secs)
-                time.sleep(3)
-                bot.reply_to(message, random.choice(pupa_quotes))
+                # If match with pupa_triggers
+                if tg_mess in pupa_triggers:
+                    bot.send_chat_action(message.chat.id, 'typing')  # show the bot "typing" (max. 5 secs)
+                    time.sleep(3)
+                    bot.reply_to(message, random.choice(pupa_quotes))
 
-            # If match with technik_triggers
-            elif tg_mess in technik_triggers:
-                bot.send_chat_action(message.chat.id, 'typing')
-                time.sleep(3)
-                bot.reply_to(message, random.choice(technik_quotes))
+                # If match with technik_triggers
+                elif tg_mess in technik_triggers:
+                    bot.send_chat_action(message.chat.id, 'typing')
+                    time.sleep(3)
+                    bot.reply_to(message, random.choice(technik_quotes))
 
-            # If match with wisdom_triggers
-            elif tg_mess in wisdom_triggers:
-                bot.send_chat_action(message.chat.id, 'upload_photo')  # show the bot "upload_photo"
-                time.sleep(3)
+                # If match with wisdom_triggers
+                elif tg_mess in wisdom_triggers:
+                    bot.send_chat_action(message.chat.id, 'upload_photo')  # show the bot "upload_photo"
+                    time.sleep(3)
 
-                # Make image with quote
-                img = Image.open(f'{config.patch}/{random.randint(1, 4)}.jpg')
-                position = (320, 50)
-                text = random.choice(pupa_wisdom)
-                font = ImageFont.truetype(f'{config.patch}/Lobster-Regular.ttf', 38)
-                ImageDraw.Draw(img).multiline_text(position, text, font=font, stroke_width=2, stroke_fill=0,
-                                                   anchor='ms',
-                                                   align='center')
+                    # Make image with quote
+                    img = Image.open(f'{config.patch}/pupaups/{random.randint(1, 12)}.jpg')
+                    position = (320, 50)
+                    text = random.choice(pupa_wisdom)
+                    font = ImageFont.truetype(f'{config.patch}/Lobster-Regular.ttf', 38)
+                    ImageDraw.Draw(img).multiline_text(position, text, font=font, stroke_width=2, stroke_fill=0,
+                                                       anchor='ms',
+                                                       align='center')
 
-                image_name_output = f'{config.patch}/wisdom.jpg'
-                img.save(image_name_output)
-                # Send image
-                bot.send_photo(message.chat.id, photo=open(image_name_output, 'rb'))
-                img.close()
+                    image_name_output = f'{config.patch}/wisdom.jpg'
+                    img.save(image_name_output)
+                    # Send image
+                    bot.send_photo(message.chat.id, photo=open(image_name_output, 'rb'))
+                    img.close()
 
-            # If message from specific user and random
-            elif message.from_user.id == config.gena_id and rand == 1:
-                bot.send_chat_action(message.chat.id, 'typing')
-                time.sleep(3)
-                bot.reply_to(message, random.choice(pupa_gena))
+                # If message from specific user and random
+                elif message.from_user.id == config.major_id and rand == 1:
+                    bot.send_chat_action(message.chat.id, 'typing')
+                    time.sleep(3)
+                    bot.reply_to(message, random.choice(pupa_gena))
 
-            # Random choice of message to reply with a sticker
-            elif rand == 2:
-                sti = open(f'{config.patch}/stickers/{random.randint(1, 35)}.webp', 'rb')
-                bot.send_chat_action(message.chat.id, 'choose_sticker')
-                time.sleep(3)
-                bot.send_sticker(message.chat.id, sti, reply_to_message_id=message.message_id)
+                # Random choice of message to reply with a sticker
+                elif rand == 2:
+                    sti = open(f'{config.patch}/stickers/{random.randint(1, 35)}.webp', 'rb')
+                    bot.send_chat_action(message.chat.id, 'choose_sticker')
+                    time.sleep(3)
+                    bot.send_sticker(message.chat.id, sti, reply_to_message_id=message.message_id)
 
-            # Random choice of message to reply
-            elif rand in [7, 10]:
-                bot.send_chat_action(message.chat.id, 'typing')
-                time.sleep(3)
-                bot.reply_to(message, random.choice(pupa_quotes))
+                # Random choice of message to reply
+                elif rand in [7, 10]:
+                    bot.send_chat_action(message.chat.id, 'typing')
+                    time.sleep(3)
+                    bot.reply_to(message, random.choice(pupa_quotes))
 
-            # Inaction if trigger words did not come
+                # Inaction if trigger words did not come
+                else:
+                    pass
+
+            # If other content type
+            elif message.content_type != 'text':
+
+                # Random choice of message to reply
+                if rand == 7:
+                    bot.send_chat_action(message.chat.id, 'typing')
+                    time.sleep(3)
+                    bot.reply_to(message, random.choice(pupa_quotes))
+
+                # If message from specific user and random
+                elif message.from_user.id == config.major_id and rand == 1:
+                    bot.send_chat_action(message.chat.id, 'typing')
+                    time.sleep(3)
+                    bot.reply_to(message, random.choice(pupa_gena))
+
+                # Inaction if trigger words did not come
+                else:
+                    pass
+
             else:
                 pass
-
-        # If other content type
-        elif message.content_type != 'text':
-
-            # Random choice of message to reply
-            if rand == 7:
-                bot.send_chat_action(message.chat.id, 'typing')
-                time.sleep(3)
-                bot.reply_to(message, random.choice(pupa_quotes))
-
-            # If message from specific user and random
-            elif message.from_user.id == config.gena_id and rand == 1:
-                bot.send_chat_action(message.chat.id, 'typing')
-                time.sleep(3)
-                bot.reply_to(message, random.choice(pupa_gena))
-
-            # Inaction if trigger words did not come
-            else:
-                pass
-
         else:
             pass
 
