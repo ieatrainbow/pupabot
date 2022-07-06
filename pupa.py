@@ -1,7 +1,11 @@
+import datetime
 import random
 import re
+import threading
 import time
+import traceback
 
+import schedule
 import telebot
 from PIL import Image, ImageDraw, ImageFont
 
@@ -47,15 +51,16 @@ CONTENT_TYPES = ['text', 'audio', 'document', 'photo', 'sticker', 'video', 'vide
 @bot.message_handler(content_types=CONTENT_TYPES)
 def handle(message):
     try:
+
+        # Set the size of the random
+        rand = random.randint(1, 10)
+
         # Logging messages from user
         if message.from_user.id == config.pupa_id and message.content_type == 'text':
             with open(f'{config.patch}/messages_log.txt', 'a', encoding='utf-8') as f:
                 f.write(message.text)
                 f.write('\n')
                 f.close()
-
-        # Set the size of the random
-        rand = random.randint(1, 10)
 
         # If simple text
         if message.content_type == 'text':
@@ -76,23 +81,7 @@ def handle(message):
 
             # If match with wisdom_triggers
             elif tg_mess in wisdom_triggers:
-                bot.send_chat_action(message.chat.id, 'upload_photo')  # show the bot "upload_photo"
-                time.sleep(3)
-
-                # Make image with quote
-                img = Image.open(f'{config.patch}/pupaups/{random.randint(1, 12)}.jpg')
-                position = (320, 50)
-                text = random.choice(pupa_wisdom)
-                font = ImageFont.truetype(f'{config.patch}/Lobster-Regular.ttf', 38)
-                ImageDraw.Draw(img).multiline_text(position, text, font=font, stroke_width=2, stroke_fill=0,
-                                                   anchor='ms',
-                                                   align='center')
-
-                image_name_output = f'{config.patch}/wisdom.jpg'
-                img.save(image_name_output)
-                # Send image
-                bot.send_photo(message.chat.id, photo=open(image_name_output, 'rb'))
-                img.close()
+                wisdom_create(message.chat.id)
 
             # If message from specific user and random
             elif message.from_user.id == config.major_id and rand == 1:
@@ -111,18 +100,17 @@ def handle(message):
 
         # If other content type
         elif message.content_type != 'text':
-            # Random choice of message to reply
-            if rand == 7:
-                random_reply(message)
-
             # If message from specific user and random
-            elif message.from_user.id == config.major_id and rand == 1:
+            if message.from_user.id == config.major_id and rand == 1:
                 major_reply(message)
 
-    except Exception as e:
+            # Random choice of message to reply
+            elif rand == 7:
+                random_reply(message)
+
+    except Exception:
         with open(f'{config.patch}/log.txt', 'a', encoding='utf-8') as f:
-            f.write(str(e))
-            f.write('\n')
+            f.write(f'{datetime.datetime.now()}\n{traceback.format_exc()}\n')
             f.close()
         bot.send_message(message.chat.id, 'Im broke (help me, guys)')
 
@@ -139,4 +127,41 @@ def random_reply(message):
     bot.reply_to(message, random.choice(pupa_quotes))
 
 
-bot.polling()
+def wisdom_create(chat_id):
+    bot.send_chat_action(chat_id, 'upload_photo')  # show the bot "upload_photo"
+    time.sleep(3)
+
+    # Make image with quote
+    img = Image.open(f'{config.patch}/pupaups/{random.randint(1, 12)}.jpg')
+    position = (320, 50)
+    text = random.choice(pupa_wisdom)
+    font = ImageFont.truetype(f'{config.patch}/Lobster-Regular.ttf', 38)
+    ImageDraw.Draw(img).multiline_text(position, text, font=font, stroke_width=2, stroke_fill=0, anchor='ms',
+                                       align='center')
+
+    image_name_output = f'{config.patch}/wisdom.jpg'
+    img.save(image_name_output)
+    # Send image
+    bot.send_photo(chat_id, photo=open(image_name_output, 'rb'))
+    img.close()
+
+
+def schedule_job():
+    # Schedule message
+    schedule.every().day.at("05:00").do(wisdom_create, config.uberpepolis_chat_id)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+
+def run_bot():
+    bot.polling()
+
+
+if __name__ == "__main__":
+    t1 = threading.Thread(target=run_bot)
+    t2 = threading.Thread(target=schedule_job)
+    # starting thread 1
+    t1.start()
+    # starting thread 2
+    t2.start()
