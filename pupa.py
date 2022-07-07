@@ -8,6 +8,7 @@ import traceback
 import schedule
 import telebot
 from PIL import Image, ImageDraw, ImageFont
+from gtts import gTTS
 
 import config
 
@@ -34,6 +35,7 @@ pupa_triggers = pupa_trig.read().split('\n')
 technik_triggers = technik_trig.read().split('\n')
 
 wisdom_triggers = ['пупмудрость']
+voice_triggers = ['пупголос']
 
 # Closing files
 pupa.close()
@@ -51,9 +53,8 @@ CONTENT_TYPES = ['text', 'audio', 'document', 'photo', 'sticker', 'video', 'vide
 @bot.message_handler(content_types=CONTENT_TYPES)
 def handle(message):
     try:
-
         # Set the size of the random
-        rand = random.randint(1, 10)
+        rand = random.randint(1, 15)
 
         # Logging messages from user
         if message.from_user.id == config.pupa_id and message.content_type == 'text':
@@ -72,6 +73,9 @@ def handle(message):
                 bot.send_chat_action(message.chat.id, 'typing')  # show the bot "typing" (max. 5 secs)
                 time.sleep(3)
                 bot.reply_to(message, random.choice(pupa_quotes))
+
+            elif tg_mess in voice_triggers:
+                random_voice_reply(message)
 
             # If match with technik_triggers
             elif tg_mess in technik_triggers:
@@ -95,8 +99,11 @@ def handle(message):
                 bot.send_sticker(message.chat.id, sti, reply_to_message_id=message.message_id)
 
             # Random choice of message to reply
-            elif rand in [7, 10]:
+            elif rand == 3:
                 random_reply(message)
+
+            elif rand == 4:
+                random_voice_reply(message)
 
         # If other content type
         elif message.content_type != 'text':
@@ -105,14 +112,18 @@ def handle(message):
                 major_reply(message)
 
             # Random choice of message to reply
-            elif rand == 7:
+            elif rand == 1:
                 random_reply(message)
+
+            elif rand == 2:
+                random_voice_reply(message)
 
     except Exception:
         with open(f'{config.patch}/log.txt', 'a', encoding='utf-8') as f:
             f.write(f'{datetime.datetime.now()}\n{traceback.format_exc()}\n')
             f.close()
-        bot.send_message(message.chat.id, 'Im broke (help me, guys)')
+        bot.send_message(config.test_chat_id, 'Im broke (help me, guys)')
+        bot.send_document(config.test_chat_id, document=open(f'{config.patch}/log.txt', 'rb'))
 
 
 def major_reply(message):
@@ -125,6 +136,16 @@ def random_reply(message):
     bot.send_chat_action(message.chat.id, 'typing')
     time.sleep(3)
     bot.reply_to(message, random.choice(pupa_quotes))
+
+
+def random_voice_reply(message):
+    bot.send_chat_action(message.chat.id, 'record_audio')
+    time.sleep(2)
+    tts = random.choice(pupa_quotes)
+    s = gTTS(tts, lang='ru', slow=False)
+    s.save(f'{config.patch}/sample.ogg')
+    bot.send_voice(message.chat.id, reply_to_message_id=message.message_id,
+                   voice=open(f'{config.patch}/sample.ogg', 'rb'))
 
 
 def wisdom_create(chat_id):
