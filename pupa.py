@@ -1,11 +1,13 @@
 import datetime
 import random
 import re
+import subprocess
 import threading
 import time
 import traceback
 
 import schedule
+import speech_recognition as sr
 import telebot
 from PIL import Image, ImageDraw, ImageFont
 from gtts import gTTS
@@ -54,7 +56,7 @@ CONTENT_TYPES = ['text', 'audio', 'document', 'photo', 'sticker', 'video', 'vide
 def handle(message):
     try:
         # Set the size of the random
-        rand = random.randint(1, 15)
+        rand = random.randint(1, 20)
 
         # Logging messages from user
         if message.from_user.id == config.pupa_id and message.content_type == 'text':
@@ -70,19 +72,15 @@ def handle(message):
 
             # If match with pupa_triggers
             if tg_mess in pupa_triggers:
-                bot.send_chat_action(message.chat.id, 'typing')  # show the bot "typing" (max. 5 secs)
-                time.sleep(3)
-                bot.reply_to(message, random.choice(pupa_quotes))
-
+                random_reply(message)
+            # If match with pupa_triggers
             elif tg_mess in voice_triggers:
                 random_voice_reply(message)
-
             # If match with technik_triggers
             elif tg_mess in technik_triggers:
                 bot.send_chat_action(message.chat.id, 'typing')
                 time.sleep(3)
                 bot.reply_to(message, random.choice(technik_quotes))
-
             # If match with wisdom_triggers
             elif tg_mess in wisdom_triggers:
                 wisdom_create(message.chat.id)
@@ -95,7 +93,7 @@ def handle(message):
             elif rand == 2:
                 sti = open(f'{config.patch}/stickers/{random.randint(1, 35)}.webp', 'rb')
                 bot.send_chat_action(message.chat.id, 'choose_sticker')
-                time.sleep(3)
+                time.sleep(2)
                 bot.send_sticker(message.chat.id, sti, reply_to_message_id=message.message_id)
 
             # Random choice of message to reply
@@ -106,7 +104,7 @@ def handle(message):
                 random_voice_reply(message)
 
         # If other content type
-        elif message.content_type != 'text':
+        elif message.content_type not in ['text', 'voice', 'video_note']:
             # If message from specific user and random
             if message.from_user.id == config.major_id and rand == 1:
                 major_reply(message)
@@ -118,23 +116,29 @@ def handle(message):
             elif rand == 2:
                 random_voice_reply(message)
 
+        elif message.content_type in ['voice', 'video_note']:
+            file_to_text(message)
+
     except Exception:
         with open(f'{config.patch}/log.txt', 'a', encoding='utf-8') as f:
             f.write(f'{datetime.datetime.now()}\n{traceback.format_exc()}\n')
             f.close()
         bot.send_message(config.test_chat_id, 'Im broke (help me, guys)')
-        bot.send_document(config.test_chat_id, document=open(f'{config.patch}/log.txt', 'rb'))
+        with open(f'{config.patch}/last_error.txt', 'w', encoding='utf-8') as f:
+            f.write(f'{datetime.datetime.now()}\n{traceback.format_exc()}\n')
+            f.close()
+        bot.send_document(config.test_chat_id, document=open(f'{config.patch}/last_error.txt', 'rb'))
 
 
 def major_reply(message):
     bot.send_chat_action(message.chat.id, 'typing')
-    time.sleep(3)
+    time.sleep(2)
     bot.reply_to(message, random.choice(pupa_gena))
 
 
 def random_reply(message):
     bot.send_chat_action(message.chat.id, 'typing')
-    time.sleep(3)
+    time.sleep(2)
     bot.reply_to(message, random.choice(pupa_quotes))
 
 
@@ -150,8 +154,7 @@ def random_voice_reply(message):
 
 def wisdom_create(chat_id):
     bot.send_chat_action(chat_id, 'upload_photo')  # show the bot "upload_photo"
-    time.sleep(3)
-
+    time.sleep(2)
     # Make image with quote
     img = Image.open(f'{config.patch}/pupaups/{random.randint(1, 12)}.jpg')
     position = (320, 50)
@@ -159,12 +162,41 @@ def wisdom_create(chat_id):
     font = ImageFont.truetype(f'{config.patch}/Lobster-Regular.ttf', 38)
     ImageDraw.Draw(img).multiline_text(position, text, font=font, stroke_width=2, stroke_fill=0, anchor='ms',
                                        align='center')
-
     image_name_output = f'{config.patch}/wisdom.jpg'
     img.save(image_name_output)
+
     # Send image
     bot.send_photo(chat_id, photo=open(image_name_output, 'rb'))
     img.close()
+
+
+def file_to_text(message):
+    bot.send_chat_action(message.chat.id, 'typing')
+    # Save file
+    if message.content_type == 'voice':
+        file_info = bot.get_file(message.voice.file_id)
+    elif message.content_type == 'video_note':
+        file_info = bot.get_file(message.video_note.file_id)
+    else:
+        file_info = None
+    downloaded_file = bot.download_file(file_info.file_path)
+    with open(f'{config.patch}/new_file.mp4', 'wb') as new_file:
+        new_file.write(downloaded_file)
+
+    # Convert oga to wav
+    src_filename = f'{config.patch}/new_file.mp4'
+    dest_filename = f'{config.patch}/sample.wav'
+    subprocess.run(['ffmpeg', '-y', '-i', src_filename, dest_filename], stdout=subprocess.DEVNULL,
+                   stderr=subprocess.DEVNULL)
+
+    # Convert speech-to-text
+    r = sr.Recognizer()
+    with sr.AudioFile(dest_filename) as source:
+        # listen for the data (load audio to memory)
+        audio_data = r.record(source)
+        # recognize (convert from speech to text)
+        speech_text = r.recognize_google(audio_data, language='ru-RU')
+    bot.reply_to(message, speech_text)
 
 
 def schedule_job():
