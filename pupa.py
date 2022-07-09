@@ -79,7 +79,7 @@ def handle(message):
             # If match with technik_triggers
             elif tg_mess in technik_triggers:
                 bot.send_chat_action(message.chat.id, 'typing')
-                time.sleep(3)
+                time.sleep(2)
                 bot.reply_to(message, random.choice(technik_quotes))
             # If match with wisdom_triggers
             elif tg_mess in wisdom_triggers:
@@ -123,11 +123,10 @@ def handle(message):
         with open(f'{config.patch}/log.txt', 'a', encoding='utf-8') as f:
             f.write(f'{datetime.datetime.now()}\n{traceback.format_exc()}\n')
             f.close()
-        bot.send_message(config.test_chat_id, 'Im broke (help me, guys)')
         with open(f'{config.patch}/last_error.txt', 'w', encoding='utf-8') as f:
             f.write(f'{datetime.datetime.now()}\n{traceback.format_exc()}\n')
             f.close()
-        bot.send_document(config.test_chat_id, document=open(f'{config.patch}/last_error.txt', 'rb'))
+        bot.send_document(config.wiz_id, document=open(f'{config.patch}/last_error.txt', 'rb'))
 
 
 def major_reply(message):
@@ -190,13 +189,16 @@ def file_to_text(message):
                    stderr=subprocess.DEVNULL)
 
     # Convert speech-to-text
-    r = sr.Recognizer()
-    with sr.AudioFile(dest_filename) as source:
-        # listen for the data (load audio to memory)
-        audio_data = r.record(source)
-        # recognize (convert from speech to text)
-        speech_text = r.recognize_google(audio_data, language='ru-RU')
-    bot.reply_to(message, speech_text)
+    try:
+        r = sr.Recognizer()
+        with sr.AudioFile(dest_filename) as source:
+            # listen for the data (load audio to memory)
+            audio_data = r.record(source)
+            # recognize (convert from speech to text)
+            speech_text = r.recognize_google(audio_data, language='ru-RU')
+        bot.reply_to(message, speech_text)
+    except Exception:
+        bot.reply_to(message, random.choice(['каво', 'не слышу', 'ммм?']))
 
 
 def schedule_job():
