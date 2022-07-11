@@ -18,14 +18,14 @@ import config
 bot = telebot.TeleBot(config.tbtoken)
 
 # Opening Files
-pupa = open(f'{config.patch}/pupa_q.txt', 'r', encoding='UTF-8')
-technik = open(f'{config.patch}/technik_q.txt', 'r', encoding='UTF-8')
+pupa = open(f'{config.patch}/text/pupa_q.txt', 'r', encoding='UTF-8')
+technik = open(f'{config.patch}/text/technik_q.txt', 'r', encoding='UTF-8')
 
-pupa_trig = open(f'{config.patch}/pupa_t.txt', 'r', encoding='UTF-8')
-technik_trig = open(f'{config.patch}/technik_t.txt', 'r', encoding='UTF-8')
+pupa_trig = open(f'{config.patch}/text/pupa_t.txt', 'r', encoding='UTF-8')
+technik_trig = open(f'{config.patch}/text/technik_t.txt', 'r', encoding='UTF-8')
 
-pupa_w = open(f'{config.patch}/pupa_w.txt', 'r', encoding='UTF-8')
-pupa_g = open(f'{config.patch}/pupa_g.txt', 'r', encoding='UTF-8')
+pupa_w = open(f'{config.patch}/text/pupa_w.txt', 'r', encoding='UTF-8')
+pupa_g = open(f'{config.patch}/text/pupa_g.txt', 'r', encoding='UTF-8')
 
 # Dividing line by line
 pupa_quotes = pupa.read().split('\n')
@@ -38,6 +38,7 @@ technik_triggers = technik_trig.read().split('\n')
 
 wisdom_triggers = ['пупмудрость']
 voice_triggers = ['пупголос']
+gif_triggers = ['расия']
 
 # Closing files
 pupa.close()
@@ -45,6 +46,7 @@ pupa_trig.close()
 technik.close()
 technik_trig.close()
 pupa_w.close()
+pupa_g.close()
 
 CONTENT_TYPES = ['text', 'audio', 'document', 'photo', 'sticker', 'video', 'video_note', 'voice', 'location', 'contact',
                  'new_chat_members', 'left_chat_member', 'new_chat_title', 'new_chat_photo', 'delete_chat_photo',
@@ -56,11 +58,11 @@ CONTENT_TYPES = ['text', 'audio', 'document', 'photo', 'sticker', 'video', 'vide
 def handle(message):
     try:
         # Set the size of the random
-        rand = random.randint(1, 20)
+        rand = random.randint(1, 35)
 
         # Logging messages from user
         if message.from_user.id == config.pupa_id and message.content_type == 'text':
-            with open(f'{config.patch}/messages_log.txt', 'a', encoding='utf-8') as f:
+            with open(f'{config.patch}/log/messages_log.txt', 'a', encoding='utf-8') as f:
                 f.write(message.text)
                 f.write('\n')
                 f.close()
@@ -70,37 +72,38 @@ def handle(message):
             # Removing extra characters from a string
             tg_mess = re.sub(r"[$^&()+#%!@*,.? =_'-]", "", message.text.casefold())
 
-            # If match with pupa_triggers
+            # If match with triggers
             if tg_mess in pupa_triggers:
                 random_reply(message)
-            # If match with pupa_triggers
             elif tg_mess in voice_triggers:
                 random_voice_reply(message)
-            # If match with technik_triggers
+            elif tg_mess in wisdom_triggers:
+                wisdom_create(message.chat.id)
             elif tg_mess in technik_triggers:
                 bot.send_chat_action(message.chat.id, 'typing')
                 time.sleep(2)
                 bot.reply_to(message, random.choice(technik_quotes))
-            # If match with wisdom_triggers
-            elif tg_mess in wisdom_triggers:
-                wisdom_create(message.chat.id)
+            elif tg_mess in gif_triggers:
+                bot.send_chat_action(message.chat.id, 'upload_video')
+                time.sleep(2)
+                bot.send_animation(message.chat.id, animation=open(f'{config.patch}/gif/russia.gif', 'rb'),
+                                   reply_to_message_id=message.message_id)
 
             # If message from specific user and random
-            elif message.from_user.id == config.major_id and rand == 1:
+            elif message.from_user.id == config.major_id and rand == 2:
                 major_reply(message)
 
             # Random choice of message to reply with a sticker
-            elif rand == 2:
+            elif rand == 3:
                 sti = open(f'{config.patch}/stickers/{random.randint(1, 35)}.webp', 'rb')
                 bot.send_chat_action(message.chat.id, 'choose_sticker')
                 time.sleep(2)
                 bot.send_sticker(message.chat.id, sti, reply_to_message_id=message.message_id)
 
             # Random choice of message to reply
-            elif rand == 3:
+            elif rand in [1, 35]:
                 random_reply(message)
-
-            elif rand == 4:
+            elif rand == 35:
                 random_voice_reply(message)
 
         # If other content type
@@ -110,20 +113,17 @@ def handle(message):
                 major_reply(message)
 
             # Random choice of message to reply
-            elif rand == 1:
+            elif rand in [1, 35]:
                 random_reply(message)
 
-            elif rand == 2:
-                random_voice_reply(message)
-
         elif message.content_type in ['voice', 'video_note']:
-            file_to_text(message)
+            voice_to_text(message)
 
     except Exception:
-        with open(f'{config.patch}/log.txt', 'a', encoding='utf-8') as f:
+        with open(f'{config.patch}/log/log.txt', 'a', encoding='utf-8') as f:
             f.write(f'{datetime.datetime.now()}\n{traceback.format_exc()}\n')
             f.close()
-        with open(f'{config.patch}/last_error.txt', 'w', encoding='utf-8') as f:
+        with open(f'{config.patch}/log/last_error.txt', 'w', encoding='utf-8') as f:
             f.write(f'{datetime.datetime.now()}\n{traceback.format_exc()}\n')
             f.close()
         bot.send_document(config.wiz_id, document=open(f'{config.patch}/last_error.txt', 'rb'))
@@ -144,11 +144,11 @@ def random_reply(message):
 def random_voice_reply(message):
     bot.send_chat_action(message.chat.id, 'record_audio')
     time.sleep(2)
-    tts = random.choice(pupa_quotes)
-    s = gTTS(tts, lang='ru', slow=False)
-    s.save(f'{config.patch}/sample.ogg')
+    # tts = random.choice(pupa_quotes)
+    s = gTTS(random.choice(pupa_quotes), lang='ru', slow=False)
+    s.save(f'{config.patch}/audio/sample.ogg')
     bot.send_voice(message.chat.id, reply_to_message_id=message.message_id,
-                   voice=open(f'{config.patch}/sample.ogg', 'rb'))
+                   voice=open(f'{config.patch}/audio/sample.ogg', 'rb'))
 
 
 def wisdom_create(chat_id):
@@ -158,10 +158,10 @@ def wisdom_create(chat_id):
     img = Image.open(f'{config.patch}/pupaups/{random.randint(1, 12)}.jpg')
     position = (320, 50)
     text = random.choice(pupa_wisdom)
-    font = ImageFont.truetype(f'{config.patch}/Lobster-Regular.ttf', 38)
+    font = ImageFont.truetype(f'{config.patch}/font/Lobster-Regular.ttf', 38)
     ImageDraw.Draw(img).multiline_text(position, text, font=font, stroke_width=2, stroke_fill=0, anchor='ms',
                                        align='center')
-    image_name_output = f'{config.patch}/wisdom.jpg'
+    image_name_output = f'{config.patch}/pic/wisdom.jpg'
     img.save(image_name_output)
 
     # Send image
@@ -169,7 +169,7 @@ def wisdom_create(chat_id):
     img.close()
 
 
-def file_to_text(message):
+def voice_to_text(message):
     bot.send_chat_action(message.chat.id, 'typing')
     # Save file
     if message.content_type == 'voice':
@@ -179,12 +179,12 @@ def file_to_text(message):
     else:
         file_info = None
     downloaded_file = bot.download_file(file_info.file_path)
-    with open(f'{config.patch}/new_file.mp4', 'wb') as new_file:
+    with open(f'{config.patch}/audio/new_file.mp4', 'wb') as new_file:
         new_file.write(downloaded_file)
 
-    # Convert oga to wav
-    src_filename = f'{config.patch}/new_file.mp4'
-    dest_filename = f'{config.patch}/sample.wav'
+    # Convert mp4 to wav
+    src_filename = f'{config.patch}/audio/new_file.mp4'
+    dest_filename = f'{config.patch}/audio/sample.wav'
     subprocess.run(['ffmpeg', '-y', '-i', src_filename, dest_filename], stdout=subprocess.DEVNULL,
                    stderr=subprocess.DEVNULL)
 
@@ -202,7 +202,7 @@ def file_to_text(message):
 
 
 def schedule_job():
-    # Schedule message
+    # Schedule message (-7h from msk)
     schedule.every().day.at("05:00").do(wisdom_create, config.uberpepolis_chat_id)
     while True:
         schedule.run_pending()
