@@ -190,9 +190,12 @@ async def wisdom_create(chat_id):
     img = Image.open(f'{config.patch}/pupaups/{random.randint(1, 12)}.jpg')
     position = (320, 0)
     text = random.choice(pupa_wisdom)
+    color = [(255, 165, 0), (0, 128, 128), (128, 0, 0), (0, 128, 0), (0, 0, 128), (128, 0, 128)]
     dedented_text = tw.fill(tw.dedent(text).strip(), width=15)
     font = ImageFont.truetype(f'{config.patch}/font/Lobster-Regular.ttf', 60)
-    ImageDraw.Draw(img).multiline_text(position, dedented_text, font=font, stroke_width=2, stroke_fill=0, anchor='ma',
+    ImageDraw.Draw(img).multiline_text(position, tw.fill(dedented_text, width=15), font=font, stroke_width=20,
+                                       stroke_fill=random.choice(color),
+                                       spacing=-40, anchor='ma',
                                        align='center')
     image_name_output = f'{config.patch}/pupaups/wisdom.jpg'
     img.save(image_name_output)
