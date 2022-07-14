@@ -222,6 +222,7 @@ async def every_day_wisdom():
 
 # async def every_day_wisdom2():
 #     # Schedule message (-7h from msk)
+
 #     aioschedule.every().day.at("17:49").do(wisdom_create, config.test_chat_id_2)
 #     while True:
 #         await aioschedule.run_pending()
