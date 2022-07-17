@@ -138,7 +138,7 @@ async def speech_to_text(message):
 async def random_quote(message):
     try:
         await bot.send_chat_action(message.chat.id, 'typing')
-        time.sleep(1)
+        time.sleep(2)
         await message.reply(random.choice(pupa_quotes))
     except Exception:
         await exception()
@@ -147,7 +147,7 @@ async def random_quote(message):
 async def random_voice_reply(message):
     try:
         await bot.send_chat_action(message.chat.id, 'record_audio')
-        time.sleep(1)
+        time.sleep(2)
         s = gTTS(random.choice(pupa_quotes), lang='ru', slow=False)
         s.save(f'{config.patch}/audio/sample.ogg')
         await bot.send_voice(message.chat.id, reply_to_message_id=message.message_id,
@@ -159,7 +159,7 @@ async def random_voice_reply(message):
 async def technik_quote(message):
     try:
         await bot.send_chat_action(message.chat.id, 'typing')
-        time.sleep(1)
+        time.sleep(2)
         await message.reply(random.choice(technik_quotes))
     except Exception:
         await exception()
@@ -168,7 +168,7 @@ async def technik_quote(message):
 async def wisdom_create(chat_id):
     try:
         await bot.send_chat_action(chat_id, 'upload_photo')  # show the bot "upload_photo"
-        time.sleep(1)
+        time.sleep(2)
         # Make image with quote
         img = Image.open(f'{config.patch}/pupaups/{random.randint(1, 12)}.jpg')
         position = (320, 0)
@@ -193,6 +193,7 @@ async def wisdom_create(chat_id):
 async def gif(message):
     try:
         await bot.send_chat_action(message.chat.id, 'upload_video')
+        time.sleep(2)
         await bot.send_animation(message.chat.id, animation=open(f'{config.patch}/gif/russia.gif', 'rb'))
     except Exception:
         await exception()
@@ -209,7 +210,7 @@ async def sticker(message):
 
 
 async def exception():
-    await bot.send_message(config.wiz_id, f"```\n{traceback.format_exc()}```", parse_mode="Markdown")
+    await bot.send_message(config.wiz_id, f"```\n{time.ctime()}\n{traceback.format_exc()}```", parse_mode="Markdown")
 
 
 async def every_day_wisdom():
