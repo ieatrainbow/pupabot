@@ -11,15 +11,18 @@ import speech_recognition as sr
 from PIL import Image, ImageDraw, ImageFont
 from aiogram import Bot, Dispatcher, executor, types
 from gtts import gTTS
+from logging.handlers import RotatingFileHandler
 
 import config
 
 # Configure logging
-logging.basicConfig(filename=f'{config.patch}/log/debug.log',
-                    filemode='a',
-                    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-                    datefmt='%H:%M:%S',
-                    level=logging.DEBUG)
+lofgile = f'{config.patch}/log/debug.log'
+handler = RotatingFileHandler(lofgile, maxBytes=5 * 1024 * 1024, backupCount=2)
+logging.basicConfig(format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                    datefmt='%y-%m-%d %H:%M:%S',
+                    level=logging.DEBUG,
+                    handlers=[handler]
+                    )
 
 # Initialize bot and dispatcher
 bot = Bot(token=config.tbtoken)
