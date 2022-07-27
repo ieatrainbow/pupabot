@@ -58,6 +58,19 @@ async def send_gif(message: types.Message):
     await gif(message)
 
 
+@dp.message_handler(regexp=r'(^п\s*[ао]\s*б\s*е\s*д\s*а\s*?)|(^😡)')
+async def send_mp3(message: types.Message):
+    await enrage(message)
+
+
+@dp.message_handler(content_types=['sticker'])
+async def send_mp3(message: types.Message):
+    if message.sticker.file_unique_id == 'AgADGwADsZeTFg':
+        await enrage(message)
+    else:
+        pass
+
+
 @dp.message_handler(regexp=r'(^п.п\s*голос\s*)')
 async def send_voice(message: types.Message):
     await random_voice_reply(message)
@@ -208,6 +221,16 @@ async def sticker(message):
         await bot.send_chat_action(message.chat.id, 'choose_sticker')
         time.sleep(1)
         await bot.send_sticker(message.chat.id, sti, reply_to_message_id=message.message_id)
+    except Exception:
+        await exception()
+
+
+async def enrage(message):
+    try:
+        enrage_mp3 = open(f'{config.patch}/audio/enrage.mp3', 'rb')
+        await bot.send_chat_action(message.chat.id, 'upload_document')
+        time.sleep(1)
+        await bot.send_audio(message.chat.id, enrage_mp3, reply_to_message_id=message.message_id)
     except Exception:
         await exception()
 
