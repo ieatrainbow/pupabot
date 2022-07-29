@@ -1,17 +1,19 @@
 import asyncio
 import logging
 import random
+import re
 import subprocess
 import textwrap as tw
 import time
 import traceback
+from logging.handlers import RotatingFileHandler
 
 import aioschedule
 import speech_recognition as sr
 from PIL import Image, ImageDraw, ImageFont
 from aiogram import Bot, Dispatcher, executor, types
 from gtts import gTTS
-from logging.handlers import RotatingFileHandler
+from transliterate import translit
 
 import config
 
@@ -88,8 +90,10 @@ async def echo(message: types.Message):
             f.write(message.text)
             f.write('\n')
             f.close()
-    if random.randint(1, 13) == 3:
+    if random.randint(1, 12) == 3:
         await random_quote(message)
+    elif random.randint(1, 10) == 5:
+        await hueficator(message)
     elif random.randint(1, 20) == 7:
         await sticker(message)
     else:
@@ -231,6 +235,38 @@ async def enrage(message):
         await bot.send_chat_action(message.chat.id, 'upload_document')
         time.sleep(1)
         await bot.send_audio(message.chat.id, enrage_mp3, reply_to_message_id=message.message_id)
+    except Exception:
+        await exception()
+
+
+async def hueficator(message):
+    try:
+        text = translit(message.text, 'ru')
+        re_text = re.sub(r'[^А-Яа-я\s]+', '', text)
+        if re_text != '':
+            word = re_text.lower().strip().split()[-1]
+            vowels = 'аеёиоуыэюя'
+            rules = {
+                'а': 'я',
+                'о': 'е',
+                'у': 'ю',
+                'ы': 'и',
+                'э': 'е',
+            }
+
+            for letter in word:
+                if letter in vowels:
+                    if letter in rules:
+                        word = rules[letter] + word[1:]
+                    break
+                else:
+                    word = word[1:]
+            hword = 'ху' + word if word else random.choice(pupa_quotes)
+            await bot.send_chat_action(message.chat.id, 'typing')
+            time.sleep(1)
+            await message.reply(hword)
+        else:
+            pass
     except Exception:
         await exception()
 
