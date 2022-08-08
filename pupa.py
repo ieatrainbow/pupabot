@@ -29,7 +29,6 @@ logging.basicConfig(format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(messa
 # Initialize bot and dispatcher
 bot = Bot(token=config.tbtoken)
 dp = Dispatcher(bot)
-
 # Opening files, dividing line by line, then close
 with open(f'{config.patch}/text/pupa_q.txt', 'r', encoding='UTF-8') as pupa_q:
     pupa_quotes = pupa_q.read().split('\n')
@@ -44,27 +43,38 @@ with open(f'{config.patch}/text/technik_q.txt', 'r', encoding='UTF-8') as techni
     technik_q.close()
 
 
-# Handlers
-@dp.message_handler(regexp=r'(^п.п\s*м.др.сть\s*)')
+# Regex handlers
+@dp.message_handler(regexp=r'(\bп.п\s*м.др.сть)')
 async def wisdom(message: types.Message):
     await wisdom_create(message.chat.id)
 
 
-@dp.message_handler(regexp=r'(^п.зиция\s*техника\s*)')
+@dp.message_handler(regexp=r'(\bп.зици.\s*техника)')
 async def technik(message: types.Message):
     await technik_quote(message)
 
 
-@dp.message_handler(regexp=r'(^р\s*[ао]\s*с\s*и\s*я\s*?)')
+@dp.message_handler(regexp=r'(\bр\s*[ао]\s*с\s*и\s*я)')
 async def send_gif(message: types.Message):
     await gif(message)
 
 
-@dp.message_handler(regexp=r'(^п\s*[ао]\s*б\s*е\s*д\s*а\s*?)|(^😡)')
+@dp.message_handler(regexp=r'(\bп\s*а\s*б\s*е\s*д\s*а)|(^😡)')
 async def send_mp3(message: types.Message):
     await enrage(message)
 
 
+@dp.message_handler(regexp=r'(\bп.п\s*голос)')
+async def send_voice(message: types.Message):
+    await random_voice_reply(message)
+
+
+@dp.message_handler(regexp=r'(\bп.п\s*з.йди\s*|\bх.хл.\s*спросим|\bpupetor.?bot)')
+async def pupa_come(message: types.Message):
+    await random_quote(message)
+
+
+# Content type handlers
 @dp.message_handler(content_types=['sticker'])
 async def send_mp3(message: types.Message):
     if message.sticker.file_unique_id == 'AgADGwADsZeTFg':
@@ -73,28 +83,19 @@ async def send_mp3(message: types.Message):
         pass
 
 
-@dp.message_handler(regexp=r'(^п.п\s*голос\s*)')
-async def send_voice(message: types.Message):
-    await random_voice_reply(message)
-
-
-@dp.message_handler(regexp=r'(^п.п\s*з.йди\s*|^х.хл.\s*спросим\s*)')
-async def pupa_come(message: types.Message):
-    await random_quote(message)
-
-
 @dp.message_handler(content_types=['text'])
 async def echo(message: types.Message):
+    rand = random.randrange(30)
     if message.from_user.id == config.pupa_id:
         with open(f'{config.patch}/log/messages_log.txt', 'a', encoding='utf-8') as f:
             f.write(message.text)
             f.write('\n')
             f.close()
-    if random.randint(1, 12) == 3:
+    if rand in [5, 15]:
         await random_quote(message)
-    elif random.randint(1, 10) == 5:
+    elif rand in [10, 20]:
         await hueficator(message)
-    elif random.randint(1, 20) == 7:
+    elif rand == 30:
         await sticker(message)
     else:
         pass
@@ -102,9 +103,10 @@ async def echo(message: types.Message):
 
 @dp.message_handler(content_types=['photo', 'video'])
 async def echo2(message: types.message):
-    if random.randint(1, 25) == 10:
+    rand = random.randrange(20)
+    if rand == 10:
         await random_quote(message)
-    elif random.randint(1, 25) == 15:
+    elif rand == 15:
         await sticker(message)
     else:
         pass
@@ -159,7 +161,7 @@ async def random_quote(message):
     try:
         await bot.send_chat_action(message.chat.id, 'typing')
         time.sleep(2)
-        await message.reply(random.choice(pupa_quotes))
+        await message.reply(random.choice(pupa_quotes).upper())
     except Exception:
         await exception()
 
@@ -243,7 +245,7 @@ async def hueficator(message):
     try:
         text = translit(message.text, 'ru')
         re_text = re.sub(r'[^А-Яа-я\s]+', '', text)
-        if re_text != '':
+        if re_text != '' and not re.match(r'(^https?://)', message.text):
             word = re_text.lower().strip().split()[-1]
             vowels = 'аеёиоуыэюя'
             rules = {
@@ -261,10 +263,10 @@ async def hueficator(message):
                     break
                 else:
                     word = word[1:]
-            hword = 'ху' + word if word else random.choice(pupa_quotes)
+            hword = 'ху' + word if word else random.choice(pupa_quotes).upper()
             await bot.send_chat_action(message.chat.id, 'typing')
             time.sleep(1)
-            await message.reply(hword)
+            await message.reply(hword.upper())
         else:
             pass
     except Exception:
