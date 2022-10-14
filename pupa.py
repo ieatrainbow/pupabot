@@ -59,7 +59,7 @@ async def send_gif(message: types.Message):
     await gif(message)
 
 
-@dp.message_handler(regexp=r'(\bв\s*о\s*т\s*т\s*у\s*т\s*в\s*е\s*р\s*ю)')
+@dp.message_handler(regexp=r'(\bв\s*о\s*т\s*т\s*у\s*т\s*в\s*е\s*р\s*ю)|(\bприду\b)')
 async def send_trust(message: types.Message):
     await trust(message)
 
