@@ -59,6 +59,11 @@ async def send_gif(message: types.Message):
     await gif(message)
 
 
+@dp.message_handler(regexp=r'(\bв\s*о\s*т\s*т\s*у\s*т\s*в\s*е\s*р\s*ю)')
+async def send_trust(message: types.Message):
+    await trust(message)
+
+
 @dp.message_handler(regexp=r'(\bп\s*а\s*б\s*е\s*д\s*а)|(^😡)')
 async def send_mp3(message: types.Message):
     await enrage(message)
@@ -103,7 +108,7 @@ async def echo(message: types.Message):
 
 @dp.message_handler(content_types=['photo', 'video'])
 async def echo2(message: types.message):
-    rand = random.randrange(20)
+    rand = random.randrange(30)
     if rand == 10:
         await random_quote(message)
     elif rand == 15:
@@ -217,6 +222,15 @@ async def gif(message):
         await bot.send_chat_action(message.chat.id, 'upload_video')
         time.sleep(2)
         await bot.send_animation(message.chat.id, animation=open(f'{config.patch}/gif/russia.gif', 'rb'))
+    except Exception:
+        await exception()
+
+
+async def trust(message):
+    try:
+        await bot.send_chat_action(message.chat.id, 'upload_video')
+        time.sleep(2)
+        await bot.send_video(message.chat.id, video=open(f'{config.patch}/video/trust.mp4', 'rb'))
     except Exception:
         await exception()
 
