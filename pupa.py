@@ -59,6 +59,11 @@ async def send_gif(message: types.Message):
     await gif(message)
 
 
+@dp.message_handler(regexp=r'(\bг\s*о\s*й\s*д\s*а)')
+async def send_goyda(message: types.Message):
+    await goyda(message)
+
+
 @dp.message_handler(regexp=r'(\bв\s*о\s*т\s*т\s*у\s*т\s*в\s*е\s*р\s*ю)|(\bприду\b)')
 async def send_trust(message: types.Message):
     await trust(message)
@@ -231,6 +236,15 @@ async def trust(message):
         await bot.send_chat_action(message.chat.id, 'upload_video')
         time.sleep(2)
         await bot.send_video(message.chat.id, video=open(f'{config.patch}/video/trust.mp4', 'rb'))
+    except Exception:
+        await exception()
+
+
+async def goyda(message):
+    try:
+        await bot.send_chat_action(message.chat.id, 'upload_video')
+        time.sleep(2)
+        await bot.send_video(message.chat.id, video=open(f'{config.patch}/video/goyda.mp4', 'rb'))
     except Exception:
         await exception()
 
