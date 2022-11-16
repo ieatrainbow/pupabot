@@ -287,7 +287,7 @@ async def hueficator(message):
     try:
         text = translit(message.text, 'ru')
         re_text = re.sub(r'[^А-Яа-я\s]+', '', text)
-        if re_text != '' and not re.match(r'(^https?://)', message.text):
+        if re_text != '' and not re.match(r'(https?://)', message.text):
             word = re_text.lower().strip().split()[-1]
             vowels = 'аеёиоуыэюя'
             rules = {
