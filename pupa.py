@@ -159,8 +159,8 @@ async def speech_to_text(message):
         try:
             r = sr.Recognizer()
             with sr.AudioFile(dest_filename) as source:
-                r.adjust_for_ambient_noise(source)
-                r.pause_threshold = 0.6
+                r.adjust_for_ambient_noise(source, duration=0)
+                r.pause_threshold = 0.8
                 # listen for the data (load audio to memory)
                 audio_data = r.record(source)
                 # recognize (convert from speech to text)
