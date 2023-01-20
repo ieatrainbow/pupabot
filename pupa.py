@@ -64,6 +64,11 @@ async def send_goyda(message: types.Message):
     await goyda(message)
 
 
+@dp.message_handler(regexp=r'(\bday\s*is\s*ruined|\bdisappointment\s*is\s*immeasurable)')
+async def send_ruined(message: types.Message):
+    await ruined(message)
+
+
 @dp.message_handler(regexp=r'(\bя\s*уста*л)')
 async def send_tired(message: types.Message):
     await tired(message)
@@ -259,6 +264,15 @@ async def tired(message):
         await bot.send_chat_action(message.chat.id, 'upload_video')
         time.sleep(2)
         await bot.send_video(message.chat.id, video=open(f'{config.patch}/video/tired.mp4', 'rb'))
+    except Exception:
+        await exception()
+
+
+async def ruined(message):
+    try:
+        await bot.send_chat_action(message.chat.id, 'upload_video')
+        time.sleep(2)
+        await bot.send_video(message.chat.id, video=open(f'{config.patch}/video/day_ruined.mp4', 'rb'))
     except Exception:
         await exception()
 
