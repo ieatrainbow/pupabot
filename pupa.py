@@ -299,30 +299,33 @@ async def enrage(message):
 
 async def hueficator(message):
     try:
-        text = translit(message.text, 'ru')
-        re_text = re.sub(r'[^А-Яа-я\s]+', '', text)
-        if re_text != '' and not re.match(r'(https?://)', message.text):
-            word = re_text.lower().strip().split()[-1]
-            vowels = 'аеёиоуыэюя'
-            rules = {
-                'а': 'я',
-                'о': 'е',
-                'у': 'ю',
-                'ы': 'и',
-                'э': 'е',
-            }
+        if not re.match(r'(https?://)', message.text):
+            text = translit(message.text, 'ru')
+            re_text = re.sub(r'[^А-Яа-я\s]+', '', text)
+            if re_text != '':
+                word = re_text.lower().strip().split()[-1]
+                vowels = 'аеёиоуыэюя'
+                rules = {
+                    'а': 'я',
+                    'о': 'е',
+                    'у': 'ю',
+                    'ы': 'и',
+                    'э': 'е',
+                }
 
-            for letter in word:
-                if letter in vowels:
-                    if letter in rules:
-                        word = rules[letter] + word[1:]
-                    break
-                else:
-                    word = word[1:]
-            hword = 'ху' + word if word else random.choice(pupa_quotes).upper()
-            await bot.send_chat_action(message.chat.id, 'typing')
-            time.sleep(1)
-            await message.reply(hword.upper())
+                for letter in word:
+                    if letter in vowels:
+                        if letter in rules:
+                            word = rules[letter] + word[1:]
+                        break
+                    else:
+                        word = word[1:]
+                hword = 'ху' + word if word else random.choice(pupa_quotes).upper()
+                await bot.send_chat_action(message.chat.id, 'typing')
+                time.sleep(1)
+                await message.reply(hword.upper())
+            else:
+                pass
         else:
             pass
     except Exception:
@@ -357,4 +360,3 @@ async def on_startup(_):
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
-
