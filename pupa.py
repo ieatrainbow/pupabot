@@ -161,18 +161,25 @@ async def speech_to_text(message):
                        stderr=subprocess.DEVNULL)
 
         # Convert speech-to-text
-        try:
-            r = sr.Recognizer()
-            with sr.AudioFile(dest_filename) as source:
-                r.adjust_for_ambient_noise(source, duration=0)
-                r.pause_threshold = 0.8
-                # listen for the data (load audio to memory)
-                audio_data = r.record(source)
-                # recognize (convert from speech to text)
-                speech_text = r.recognize_google(audio_data, language='ru-RU', pfilter=0)
-            await message.reply(speech_text)
-        except sr.UnknownValueError:
-            await message.reply(random.choice(['каво', 'не слышу', 'ммм?']))
+        max_attempts = 3  # максимальное количество попыток
+
+        for attempt in range(1, max_attempts + 1):
+            try:
+                r = sr.Recognizer()
+                with sr.AudioFile(dest_filename) as source:
+                    r.adjust_for_ambient_noise(source, duration=0)
+                    r.pause_threshold = 0.8
+                    # listen for the data (load audio to memory)
+                    audio_data = r.record(source)
+                    # recognize (convert from speech to text)
+                    speech_text = r.recognize_google(audio_data, language='ru-RU', pfilter=0)
+                await message.reply(speech_text)
+                break
+            except sr.UnknownValueError:
+                if attempt < max_attempts:
+                    continue
+                else:
+                    await message.reply(random.choice(['каво', 'не слышу', 'ммм?']))
     except Exception:
         await exception()
 
