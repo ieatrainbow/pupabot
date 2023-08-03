@@ -11,7 +11,8 @@ from logging.handlers import RotatingFileHandler
 import aioschedule
 import speech_recognition as sr
 from PIL import Image, ImageDraw, ImageFont
-from aiogram import Bot, Dispatcher, executor, types
+from aiogram import Bot, Dispatcher, types
+from aiogram.utils import executor
 from gtts import gTTS
 from transliterate import translit
 
@@ -62,6 +63,11 @@ async def send_gif(message: types.Message):
 @dp.message_handler(regexp=r'(\bг\s*о\s*й\s*д\s*а)')
 async def send_goyda(message: types.Message):
     await goyda(message)
+
+
+@dp.message_handler(regexp=r'(\bн\s*а\s*е\s*б\s*)')
+async def send_lie(message: types.Message):
+    await lying_voice_reply(message)
 
 
 @dp.message_handler(regexp=r'(\bday\s*is\s*ruined|\bdisappointment\s*is\s*immeasurable)')
@@ -138,32 +144,33 @@ async def stt(message: types.voice and types.video_note):
 
 
 # Functions
+
 async def speech_to_text(message):
-    try:
-        await bot.send_chat_action(message.chat.id, 'typing')
-        # Save file
-        if message.content_type == 'voice':
-            file_info = await bot.get_file(message.voice.file_id)
-        elif message.content_type == 'video_note':
-            file_info = await bot.get_file(message.video_note.file_id)
-        elif message.content_type == 'video':
-            file_info = await bot.get_file(message.video.file_id)
-        elif message.content_type == 'audio':
-            file_info = await bot.get_file(message.audio.file_id)
-        else:
-            file_info = None
+    max_attempts = 3
+    attempt = 0
+    while attempt < max_attempts:
+        try:
+            await bot.send_chat_action(message.chat.id, 'typing')
+            # Save file
+            if message.content_type == 'voice':
+                file_info = await bot.get_file(message.voice.file_id)
+            elif message.content_type == 'video_note':
+                file_info = await bot.get_file(message.video_note.file_id)
+            elif message.content_type == 'video':
+                file_info = await bot.get_file(message.video.file_id)
+            elif message.content_type == 'audio':
+                file_info = await bot.get_file(message.audio.file_id)
+            else:
+                file_info = None
 
-        await bot.download_file(file_info.file_path, f'{config.patch}/audio/new_file.mp4')
-        # Convert mp4 to wav
-        src_filename = f'{config.patch}/audio/new_file.mp4'
-        dest_filename = f'{config.patch}/audio/sample.wav'
-        subprocess.run(['ffmpeg', '-y', '-i', src_filename, dest_filename], stdout=subprocess.DEVNULL,
-                       stderr=subprocess.DEVNULL)
+            await bot.download_file(file_info.file_path, f'{config.patch}/audio/new_file.mp4')
+            # Convert mp4 to wav
+            src_filename = f'{config.patch}/audio/new_file.mp4'
+            dest_filename = f'{config.patch}/audio/sample.wav'
+            subprocess.run(['ffmpeg', '-y', '-i', src_filename, dest_filename], stdout=subprocess.DEVNULL,
+                           stderr=subprocess.DEVNULL)
 
-        # Convert speech-to-text
-        max_attempts = 3  # максимальное количество попыток
-
-        for attempt in range(1, max_attempts + 1):
+            # Convert speech-to-text
             try:
                 r = sr.Recognizer()
                 with sr.AudioFile(dest_filename) as source:
@@ -174,14 +181,13 @@ async def speech_to_text(message):
                     # recognize (convert from speech to text)
                     speech_text = r.recognize_google(audio_data, language='ru-RU', pfilter=0)
                 await message.reply(speech_text)
-                break
+                break  # exit the loop if successful
             except sr.UnknownValueError:
-                if attempt < max_attempts:
-                    continue
-                else:
-                    await message.reply(random.choice(['каво', 'не слышу', 'ммм?']))
-    except Exception:
-        await exception()
+                await message.reply(random.choice(['каво', 'не слышу', 'ммм?']))
+        except Exception:
+            await exception()
+        attempt += 1
+        await asyncio.sleep(10)  # add a delay before retrying
 
 
 async def random_quote(message):
@@ -205,6 +211,16 @@ async def random_voice_reply(message):
         await exception()
 
 
+async def lying_voice_reply(message):
+    try:
+        await bot.send_chat_action(message.chat.id, 'record_audio')
+        time.sleep(2)
+        await bot.send_voice(message.chat.id, reply_to_message_id=message.message_id,
+                             voice=open(f'{config.patch}/audio/lying.ogg', 'rb'))
+    except Exception:
+        await exception()
+
+
 async def technik_quote(message):
     try:
         await bot.send_chat_action(message.chat.id, 'typing')
@@ -215,28 +231,34 @@ async def technik_quote(message):
 
 
 async def wisdom_create(chat_id):
-    try:
-        await bot.send_chat_action(chat_id, 'upload_photo')  # show the bot "upload_photo"
-        time.sleep(2)
-        # Make image with quote
-        img = Image.open(f'{config.patch}/pupaups/{random.randint(1, 12)}.jpg')
-        position = (320, 0)
-        text = random.choice(pupa_wisdom)
-        color = [(255, 165, 0), (0, 128, 128), (128, 0, 0), (0, 128, 0), (0, 0, 128), (128, 0, 128)]
-        dedented_text = tw.fill(tw.dedent(text).strip(), width=15)
-        font = ImageFont.truetype(f'{config.patch}/font/Lobster-Regular.ttf', 60)
-        ImageDraw.Draw(img).multiline_text(position, tw.fill(dedented_text, width=15), font=font, stroke_width=20,
-                                           stroke_fill=random.choice(color),
-                                           spacing=-40, anchor='ma',
-                                           align='center')
-        image_name_output = f'{config.patch}/pupaups/wisdom.jpg'
-        img.save(image_name_output)
+    max_attempts = 3
+    attempt = 0
+    while attempt < max_attempts:
+        try:
+            await bot.send_chat_action(chat_id, 'upload_photo')  # show the bot "upload_photo"
+            time.sleep(2)
+            # Make image with quote
+            img = Image.open(f'{config.patch}/pupaups/{random.randint(1, 12)}.jpg')
+            position = (320, 0)
+            text = random.choice(pupa_wisdom)
+            color = [(255, 165, 0), (0, 128, 128), (128, 0, 0), (0, 128, 0), (0, 0, 128), (128, 0, 128)]
+            dedented_text = tw.fill(tw.dedent(text).strip(), width=15)
+            font = ImageFont.truetype(f'{config.patch}/font/Lobster-Regular.ttf', 60)
+            ImageDraw.Draw(img).multiline_text(position, tw.fill(dedented_text, width=15), font=font, stroke_width=20,
+                                               stroke_fill=random.choice(color),
+                                               spacing=-40, anchor='ma',
+                                               align='center')
+            image_name_output = f'{config.patch}/pupaups/wisdom.jpg'
+            img.save(image_name_output)
 
-        # Send image
-        await bot.send_photo(chat_id, photo=open(image_name_output, 'rb'))
-        img.close()
-    except Exception:
-        await exception()
+            # Send image
+            await bot.send_photo(chat_id, photo=open(image_name_output, 'rb'))
+            img.close()
+            break  # exit the loop if successful
+        except Exception:
+            await exception()
+        attempt += 1
+        await asyncio.sleep(10)  # add a delay before retrying
 
 
 async def gif(message):
