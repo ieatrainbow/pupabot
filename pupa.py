@@ -105,6 +105,8 @@ async def pupa_come(message: types.Message):
 async def send_mp3(message: types.Message):
     if message.sticker.file_unique_id == 'AgADGwADsZeTFg':
         await enrage(message)
+    elif message.sticker.file_unique_id == 'AgADPAADsZeTFg':
+        await lying_voice_reply(message)
     else:
         pass
 
