@@ -9,6 +9,7 @@ import traceback
 from logging.handlers import RotatingFileHandler
 
 import aioschedule
+import openai
 import speech_recognition as sr
 from PIL import Image, ImageDraw, ImageFont
 from aiogram import Bot, Dispatcher, types
@@ -30,6 +31,8 @@ logging.basicConfig(format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(messa
 # Initialize bot and dispatcher
 bot = Bot(token=config.tbtoken)
 dp = Dispatcher(bot)
+openai.api_key = config.openai_token
+
 # Opening files, dividing line by line, then close
 with open(f'{config.patch}/text/pupa_q.txt', 'r', encoding='UTF-8') as pupa_q:
     pupa_quotes = pupa_q.read().split('\n')
@@ -80,6 +83,11 @@ async def send_tired(message: types.Message):
     await tired(message)
 
 
+@dp.message_handler(regexp=r'(\bчика\s*пака)')
+async def send_tired(message: types.Message):
+    await chica(message)
+
+
 @dp.message_handler(regexp=r'(\bв\s*о\s*т\s*т\s*у\s*т\s*в\s*е\s*р\s*ю)|(\bприду\b)')
 async def send_trust(message: types.Message):
     await trust(message)
@@ -95,9 +103,14 @@ async def send_voice(message: types.Message):
     await random_voice_reply(message)
 
 
-@dp.message_handler(regexp=r'(\bп.п\s*з.йди\s*|\bх.хл.\s*спросим|\bpupetor.?bot)')
+@dp.message_handler(regexp=r'(\bп.п\s*з.йди\s*|\bх.хл.\s*спросим)')
 async def pupa_come(message: types.Message):
     await random_quote(message)
+
+
+@dp.message_handler(regexp=r'(\bpupetor.?bot)')
+async def pupa_ai(message: types.Message):
+    await pupai(message)
 
 
 # Content type handlers
@@ -299,6 +312,15 @@ async def tired(message):
         await exception()
 
 
+async def chica(message):
+    try:
+        await bot.send_chat_action(message.chat.id, 'upload_video')
+        time.sleep(2)
+        await bot.send_video(message.chat.id, video=open(f'{config.patch}/video/chicapaka.mp4', 'rb'))
+    except Exception:
+        await exception()
+
+
 async def ruined(message):
     try:
         await bot.send_chat_action(message.chat.id, 'upload_video')
@@ -373,6 +395,61 @@ async def every_day_wisdom():
     while True:
         await aioschedule.run_pending()
         await asyncio.sleep(1)
+
+
+max_token_count = 4096
+messages = [
+
+    {
+
+        "role": "system",
+        "content": "Im PupAI, assistant at uberpepolis channel"
+    }
+
+]
+
+
+def update(messages, role, content):
+    messages.append({"role": role, "content": content})
+
+
+def reset_messages():
+    messages.clear()
+
+    messages.append({
+
+        "role": "system",
+        "content": "Im PupAI, assistant at uberpepolis channel"
+
+    })
+
+
+async def pupai(message):
+    try:
+
+        update(messages, 'user', message.text)
+
+        response = openai.ChatCompletion.create(
+
+            model="gpt-3.5-turbo-16k",
+
+            messages=messages,
+
+            max_tokens=max_token_count,
+
+        )
+
+        if response['usage']['total_tokens'] >= max_token_count:
+            await message.answer(
+
+                f'В данный момент вы использовали максимум токенов в рамках контекста: {response["usage"]["total_tokens"]}, будет произведена очистка памяти')
+
+            reset_messages()
+
+        await message.answer(response['choices'][0]['message']['content'], parse_mode="HTML")
+
+    except Exception:
+        await exception()
 
 
 # async def every_day_wisdom2():
