@@ -6,6 +6,7 @@ import subprocess
 import textwrap as tw
 import time
 import traceback
+from functools import partial
 from logging.handlers import RotatingFileHandler
 
 import aioschedule
@@ -47,118 +48,15 @@ with open(f'{config.patch}/text/technik_q.txt', 'r', encoding='UTF-8') as techni
     technik_q.close()
 
 
-# Regex handlers
-@dp.message_handler(regexp=r'(\bп.п\s*м.др.сть)')
-async def wisdom(message: types.Message):
-    await wisdom_create(message.chat.id)
-
-
-@dp.message_handler(regexp=r'(\bп.зици.\s*техника)')
-async def technik(message: types.Message):
-    await technik_quote(message)
-
-
-@dp.message_handler(regexp=r'(\bр\s*[ао]\s*с\s*и\s*я)')
-async def send_gif(message: types.Message):
-    await gif(message)
-
-
-@dp.message_handler(regexp=r'(\bг\s*о\s*й\s*д\s*а)')
-async def send_goyda(message: types.Message):
-    await goyda(message)
-
-
-@dp.message_handler(regexp=r'(\bн\s*а\s*е\s*б\s*)')
-async def send_lie(message: types.Message):
-    await lying_voice_reply(message)
-
-
-@dp.message_handler(regexp=r'(\bday\s*is\s*ruined|\bdisappointment\s*is\s*immeasurable)')
-async def send_ruined(message: types.Message):
-    await ruined(message)
-
-
-@dp.message_handler(regexp=r'(\bя\s*уста*л)')
-async def send_tired(message: types.Message):
-    await tired(message)
-
-
-@dp.message_handler(regexp=r'(\bчика\s*пака)')
-async def send_tired(message: types.Message):
-    await chica(message)
-
-
-@dp.message_handler(regexp=r'(\bв\s*о\s*т\s*т\s*у\s*т\s*в\s*е\s*р\s*ю)|(\bприду\b)')
-async def send_trust(message: types.Message):
-    await trust(message)
-
-
-@dp.message_handler(regexp=r'(\bп\s*а\s*б\s*е\s*д\s*а)|(^😡)')
-async def send_mp3(message: types.Message):
-    await enrage(message)
-
-
-@dp.message_handler(regexp=r'(\bп.п\s*голос)')
-async def send_voice(message: types.Message):
-    await random_voice_reply(message)
-
-
-@dp.message_handler(regexp=r'(\bп.п\s*з.йди\s*|\bх.хл.\s*спросим)')
-async def pupa_come(message: types.Message):
-    await random_quote(message)
-
-
-@dp.message_handler(regexp=r'(\bpupetor.?bot)')
-async def pupa_ai(message: types.Message):
-    await pupai(message)
-
-
-# Content type handlers
-@dp.message_handler(content_types=['sticker'])
-async def send_mp3(message: types.Message):
-    if message.sticker.file_unique_id == 'AgADGwADsZeTFg':
-        await enrage(message)
-    elif message.sticker.file_unique_id == 'AgADPAADsZeTFg':
-        await lying_voice_reply(message)
-    else:
-        pass
-
-
-@dp.message_handler(content_types=['text'])
-async def echo(message: types.Message):
-    rand = random.randrange(30)
-    if message.from_user.id == config.pupa_id:
-        with open(f'{config.patch}/log/messages_log.txt', 'a', encoding='utf-8') as f:
-            f.write(message.text)
-            f.write('\n')
-            f.close()
-    if rand in [5, 15]:
-        await random_quote(message)
-    elif rand in [10, 20]:
-        await hueficator(message)
-    elif rand == 30:
-        await sticker(message)
-    else:
-        pass
-
-
-@dp.message_handler(content_types=['photo', 'video'])
-async def echo2(message: types.message):
-    rand = random.randrange(30)
-    if rand == 10:
-        await random_quote(message)
-    elif rand == 15:
-        await sticker(message)
-    else:
-        pass
-
-
-@dp.message_handler(content_types=['voice', 'video_note'])
-async def stt(message: types.voice and types.video_note):
-    await speech_to_text(message)
-
-
 # Functions
+async def send_random_quote(message):
+    try:
+        await bot.send_chat_action(message.chat.id, 'typing')
+        time.sleep(2)
+        await message.reply(random.choice(pupa_quotes).upper())
+    except Exception:
+        await exception()
+
 
 async def speech_to_text(message):
     max_attempts = 3
@@ -203,15 +101,6 @@ async def speech_to_text(message):
             await exception()
         attempt += 1
         await asyncio.sleep(10)  # add a delay before retrying
-
-
-async def random_quote(message):
-    try:
-        await bot.send_chat_action(message.chat.id, 'typing')
-        time.sleep(2)
-        await message.reply(random.choice(pupa_quotes).upper())
-    except Exception:
-        await exception()
 
 
 async def random_voice_reply(message):
@@ -276,7 +165,7 @@ async def wisdom_create(chat_id):
         await asyncio.sleep(10)  # add a delay before retrying
 
 
-async def gif(message):
+async def russia(message):
     try:
         await bot.send_chat_action(message.chat.id, 'upload_video')
         time.sleep(2)
@@ -285,52 +174,7 @@ async def gif(message):
         await exception()
 
 
-async def trust(message):
-    try:
-        await bot.send_chat_action(message.chat.id, 'upload_video')
-        time.sleep(2)
-        await bot.send_video(message.chat.id, video=open(f'{config.patch}/video/trust.mp4', 'rb'))
-    except Exception:
-        await exception()
-
-
-async def goyda(message):
-    try:
-        await bot.send_chat_action(message.chat.id, 'upload_video')
-        time.sleep(2)
-        await bot.send_video(message.chat.id, video=open(f'{config.patch}/video/goyda.mp4', 'rb'))
-    except Exception:
-        await exception()
-
-
-async def tired(message):
-    try:
-        await bot.send_chat_action(message.chat.id, 'upload_video')
-        time.sleep(2)
-        await bot.send_video(message.chat.id, video=open(f'{config.patch}/video/tired.mp4', 'rb'))
-    except Exception:
-        await exception()
-
-
-async def chica(message):
-    try:
-        await bot.send_chat_action(message.chat.id, 'upload_video')
-        time.sleep(2)
-        await bot.send_video(message.chat.id, video=open(f'{config.patch}/video/chicapaka.mp4', 'rb'))
-    except Exception:
-        await exception()
-
-
-async def ruined(message):
-    try:
-        await bot.send_chat_action(message.chat.id, 'upload_video')
-        time.sleep(2)
-        await bot.send_video(message.chat.id, video=open(f'{config.patch}/video/day_ruined.mp4', 'rb'))
-    except Exception:
-        await exception()
-
-
-async def sticker(message):
+async def send_sticker(message):
     try:
         sti = open(f'{config.patch}/stickers/{random.randint(1, 35)}.webp', 'rb')
         await bot.send_chat_action(message.chat.id, 'choose_sticker')
@@ -341,13 +185,15 @@ async def sticker(message):
 
 
 async def enrage(message):
+    audio_path = f'{config.patch}/audio/enrage.mp3'
+    audio_file = open(audio_path, 'rb')
+
     try:
-        enrage_mp3 = open(f'{config.patch}/audio/enrage.mp3', 'rb')
         await bot.send_chat_action(message.chat.id, 'upload_document')
-        time.sleep(1)
-        await bot.send_audio(message.chat.id, enrage_mp3, reply_to_message_id=message.message_id)
-    except Exception:
-        await exception()
+        await asyncio.sleep(1)
+        await bot.send_audio(message.chat.id, audio_file, reply_to_message_id=message.message_id)
+    finally:
+        audio_file.close()
 
 
 async def hueficator(message):
@@ -397,73 +243,153 @@ async def every_day_wisdom():
         await asyncio.sleep(1)
 
 
-max_token_count = 4096
-messages = [
-
-    {
-
-        "role": "system",
-        "content": "Im PupAI, assistant at uberpepolis channel"
-    }
-
-]
+async def on_startup(_):
+    asyncio.create_task(every_day_wisdom())
 
 
-def update(messages, role, content):
-    messages.append({"role": role, "content": content})
+# Ai func
+# max_token_count = 4096
+# messages = [
+#
+#     {
+#
+#         "role": "system",
+#         "content": "Im PupAI, assistant at uberpepolis channel"
+#     }
+#
+# ]
+#
+#
+# def update(messages, role, content):
+#     messages.append({"role": role, "content": content})
+#
+#
+# def reset_messages():
+#     messages.clear()
+#
+#     messages.append({
+#
+#         "role": "system",
+#         "content": "Im PupAI, assistant at uberpepolis channel"
+#
+#     })
+#
+#
+# async def pupai(message):
+#     try:
+#
+#         update(messages, 'user', message.text)
+#
+#         response = openai.ChatCompletion.create(
+#
+#             model="gpt-3.5-turbo-16k",
+#
+#             messages=messages,
+#
+#             max_tokens=max_token_count,
+#
+#         )
+#
+#         if response['usage']['total_tokens'] >= max_token_count:
+#             await message.answer(
+#
+#                 f'В данный момент вы использовали максимум токенов в рамках контекста:
+#                 {response["usage"]["total_tokens"]}, будет произведена очистка памяти')
+#
+#             reset_messages()
+#
+#         await message.answer(response['choices'][0]['message']['content'], parse_mode="HTML")
+#
+#     except Exception:
+#         await exception()
 
 
-def reset_messages():
-    messages.clear()
-
-    messages.append({
-
-        "role": "system",
-        "content": "Im PupAI, assistant at uberpepolis channel"
-
-    })
-
-
-async def pupai(message):
+async def send_video(message, video_name):
     try:
-
-        update(messages, 'user', message.text)
-
-        response = openai.ChatCompletion.create(
-
-            model="gpt-3.5-turbo-16k",
-
-            messages=messages,
-
-            max_tokens=max_token_count,
-
-        )
-
-        if response['usage']['total_tokens'] >= max_token_count:
-            await message.answer(
-
-                f'В данный момент вы использовали максимум токенов в рамках контекста: {response["usage"]["total_tokens"]}, будет произведена очистка памяти')
-
-            reset_messages()
-
-        await message.answer(response['choices'][0]['message']['content'], parse_mode="HTML")
-
+        await bot.send_chat_action(message.chat.id, 'upload_video')
+        time.sleep(2)
+        video_path = f'{config.patch}/video/{video_name}.mp4'
+        await bot.send_video(message.chat.id, video=open(video_path, 'rb'))
     except Exception:
         await exception()
 
 
-# async def every_day_wisdom2():
-#     # Schedule message (-7h from msk)
+# Regex handlers
+key_video_names = {
+    r'(\bг\s*о\s*й\s*д\s*а)': 'goyda',
+    r'(\bday\s*is\s*ruined|\bdisappointment\s*is\s*immeasurable|\bдень\s*испорчен)': 'ruined',
+    r'(\bя\s*уста*л)': 'tired',
+    r'(\bчика\s*пака)': 'chica',
+    r'(\bне\s*хочу\s.*работать)': 'work',
+    r'(\bв\s*о\s*т\s*т\s*у\s*т\s*в\s*е\s*р\s*ю)|(\bприду\b)': 'trust'
+}
 
-#     aioschedule.every().day.at("17:49").do(wisdom_create, config.test_chat_id_2)
-#     while True:
-#         await aioschedule.run_pending()
-#         await asyncio.sleep(1)
+key_names = {
+    r'(\bп.п\s*з.йди\s*|\bх.хл.\s*спросим)': send_random_quote,
+    r'(\bп.п\s*м.др.сть)': wisdom_create,
+    r'(\bп.зици.\s*техника)': technik_quote,
+    r'(\bр\s*[ао]\s*с\s*и\s*я)': russia,
+    r'(\bп\s*а\s*б\s*е\s*д\s*а)|(^😡)': enrage,
+    r'(\bн\s*а\s*е\s*б\s*)': lying_voice_reply,
+    r'(\bп.п\s*голос)': random_voice_reply
+}
+
+key_functions = {**{key: partial(send_video, video_name=value) for key, value in key_video_names.items()},
+                 **key_names}
 
 
-async def on_startup(_):
-    asyncio.create_task(every_day_wisdom())
-    # asyncio.create_task(every_day_wisdom2())
+@dp.message_handler()
+async def process_message(message: types.Message):
+    for regex, function in key_functions.items():
+        if re.search(regex, message.text.lower()):
+            if isinstance(function, str):
+                await dp.bot.send_message(message.chat.id, function)
+            else:
+                await function(message)
+            break
+
+
+# Content type handlers
+@dp.message_handler(content_types=['sticker'])
+async def send_mp3(message: types.Message):
+    if message.sticker.file_unique_id == 'AgADGwADsZeTFg':
+        await enrage(message)
+    elif message.sticker.file_unique_id == 'AgADPAADsZeTFg':
+        await lying_voice_reply(message)
+    else:
+        pass
+
+
+@dp.message_handler(content_types=['text'])
+async def echo(message: types.Message):
+    rand = random.randrange(30)
+    if message.from_user.id == config.pupa_id:
+        with open(f'{config.patch}/log/messages_log.txt', 'a', encoding='utf-8') as f:
+            f.write(message.text)
+            f.write('\n')
+            f.close()
+    if rand in [5, 15]:
+        await send_random_quote(message)
+    elif rand in [10, 20]:
+        await hueficator(message)
+    elif rand == 30:
+        await send_sticker(message)
+    else:
+        pass
+
+
+@dp.message_handler(content_types=['photo', 'video'])
+async def handle_photo_or_video(message: types.Message):
+    random_number = random.randint(1, 30)
+    if random_number == 10:
+        await send_random_quote(message)
+    elif random_number == 15:
+        await send_sticker(message)
+
+
+@dp.message_handler(content_types=['voice', 'video_note'])
+async def stt(message: types.voice and types.video_note):
+    await speech_to_text(message)
 
 
 if __name__ == '__main__':
