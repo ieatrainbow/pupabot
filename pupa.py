@@ -321,6 +321,7 @@ key_video_names = {
     r'(\bя\s*уста*л)': 'tired',
     r'(\bчика\s*пака)': 'chica',
     r'(\bне\s*хочу\s.*работать)': 'work',
+    r'(\bахует*)': 'ahuet',
     r'(\bв\s*о\s*т\s*т\s*у\s*т\s*в\s*е\s*р\s*ю)|(\bприду\b)': 'trust'
 }
 
@@ -338,42 +339,43 @@ key_functions = {**{key: partial(send_video, video_name=value) for key, value in
                  **key_names}
 
 
-@dp.message_handler()
+# Handlers
+
+
+@dp.message_handler(content_types=['text'])
 async def process_message(message: types.Message):
+    rand = random.randrange(30)
+    regex_condition_met = False
     for regex, function in key_functions.items():
         if re.search(regex, message.text.lower()):
+            regex_condition_met = True
             if isinstance(function, str):
                 await dp.bot.send_message(message.chat.id, function)
             else:
                 await function(message)
             break
+    if not regex_condition_met:
+        if message.from_user.id == config.pupa_id:
+            with open(f'{config.patch}/log/messages_log.txt', 'a', encoding='utf-8') as f:
+                f.write(message.text)
+                f.write('\n')
+                f.close()
+        if rand in [5, 15]:
+            await send_random_quote(message)
+        elif rand in [10, 20]:
+            await hueficator(message)
+        elif rand == 30:
+            await send_sticker(message)
+        else:
+            pass
 
 
-# Content type handlers
 @dp.message_handler(content_types=['sticker'])
 async def send_mp3(message: types.Message):
     if message.sticker.file_unique_id == 'AgADGwADsZeTFg':
         await enrage(message)
     elif message.sticker.file_unique_id == 'AgADPAADsZeTFg':
         await lying_voice_reply(message)
-    else:
-        pass
-
-
-@dp.message_handler(content_types=['text'])
-async def echo(message: types.Message):
-    rand = random.randrange(30)
-    if message.from_user.id == config.pupa_id:
-        with open(f'{config.patch}/log/messages_log.txt', 'a', encoding='utf-8') as f:
-            f.write(message.text)
-            f.write('\n')
-            f.close()
-    if rand in [5, 15]:
-        await send_random_quote(message)
-    elif rand in [10, 20]:
-        await hueficator(message)
-    elif rand == 30:
-        await send_sticker(message)
     else:
         pass
 
