@@ -59,7 +59,7 @@ async def send_random_quote(message):
 
 
 async def speech_to_text(message):
-    max_attempts = 3
+    max_attempts = 2
     attempt = 0
     while attempt < max_attempts:
         try:
@@ -170,6 +170,15 @@ async def russia(message):
         await bot.send_chat_action(message.chat.id, 'upload_video')
         time.sleep(2)
         await bot.send_animation(message.chat.id, animation=open(f'{config.patch}/gif/russia.gif', 'rb'))
+    except Exception:
+        await exception()
+
+
+async def think(message):
+    try:
+        await bot.send_chat_action(message.chat.id, 'upload_video')
+        time.sleep(2)
+        await bot.send_animation(message.chat.id, animation=open(f'{config.patch}/video/think.mp4', 'rb'))
     except Exception:
         await exception()
 
@@ -319,6 +328,7 @@ key_video_names = {
     r'(\bг\s*о\s*й\s*д\s*а)': 'goyda',
     r'(\bday\s*is\s*ruined|\bdisappointment\s*is\s*immeasurable|\bдень\s*испорчен)': 'ruined',
     r'(\bя\s*уста*л)': 'tired',
+    r'(\bзаебался*)': 'tired_tech',
     r'(\bчика\s*пака)': 'chica',
     r'(\bне\s*хочу\s.*работать)': 'work',
     r'(\bахует*)': 'ahuet',
@@ -366,6 +376,8 @@ async def process_message(message: types.Message):
             await hueficator(message)
         elif rand == 30:
             await send_sticker(message)
+        elif rand == 25:
+            await think(message)
         else:
             pass
 
