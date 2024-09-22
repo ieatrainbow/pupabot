@@ -209,7 +209,7 @@ async def hueficator(message):
     try:
         if not re.match(r'(https?://)', message.text):
             text = translit(message.text, 'ru')
-            re_text = re.sub(r'[^А-Яа-я\s]+', '', text)
+            re_text = re.sub(r'[^А-Яа-яёЁ\s]+', '', text)
             if re_text != '':
                 word = re_text.lower().strip().split()[-1]
                 vowels = 'аеёиоуыэюя'
@@ -354,7 +354,7 @@ key_functions = {**{key: partial(send_video, video_name=value) for key, value in
 
 @dp.message_handler(content_types=['text'])
 async def process_message(message: types.Message):
-    rand = random.randrange(30)
+    rand = random.randrange(2)
     regex_condition_met = False
     for regex, function in key_functions.items():
         if re.search(regex, message.text.lower()):
@@ -372,7 +372,7 @@ async def process_message(message: types.Message):
                 f.close()
         if rand in [5, 15]:
             await send_random_quote(message)
-        elif rand in [10, 20]:
+        elif rand in [1]:
             await hueficator(message)
         elif rand == 30:
             await send_sticker(message)
