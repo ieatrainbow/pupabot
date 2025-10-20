@@ -21,8 +21,8 @@ from transliterate import translit
 import config
 
 # Configure logging
-lofgile = f'{config.patch}/log/debug.log'
-handler = RotatingFileHandler(lofgile, maxBytes=5 * 1024 * 1024, backupCount=2)
+logfile = f'{config.patch}/log/debug.log'
+handler = RotatingFileHandler(logfile, maxBytes=5 * 1024 * 1024, backupCount=2)
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                     datefmt='%y-%m-%d %H:%M:%S',
                     level=logging.DEBUG,
