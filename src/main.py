@@ -5,7 +5,6 @@ import re
 import subprocess
 import textwrap as tw
 import time
-import traceback
 from functools import partial
 from logging.handlers import RotatingFileHandler
 
@@ -19,10 +18,12 @@ from gtts import gTTS
 from transliterate import translit
 
 import config
+from helpers import exception
 
 # Configure logging
 logfile = f'{config.patch}/log/debug.log'
 handler = RotatingFileHandler(logfile, maxBytes=5 * 1024 * 1024, backupCount=2)
+
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                     datefmt='%y-%m-%d %H:%M:%S',
                     level=logging.DEBUG,
@@ -240,10 +241,6 @@ async def hueficator(message):
         await exception()
 
 
-async def exception():
-    await bot.send_message(config.wiz_id, f"```\n{time.ctime()}\n{traceback.format_exc()}```", parse_mode="Markdown")
-
-
 async def every_day_wisdom():
     # Schedule message (-7h from msk)
     aioschedule.every().day.at("05:00").do(wisdom_create, config.uberpepolis_chat_id)
@@ -254,63 +251,6 @@ async def every_day_wisdom():
 
 async def on_startup(_):
     asyncio.create_task(every_day_wisdom())
-
-
-# Ai func
-# max_token_count = 4096
-# messages = [
-#
-#     {
-#
-#         "role": "system",
-#         "content": "Im PupAI, assistant at uberpepolis channel"
-#     }
-#
-# ]
-#
-#
-# def update(messages, role, content):
-#     messages.append({"role": role, "content": content})
-#
-#
-# def reset_messages():
-#     messages.clear()
-#
-#     messages.append({
-#
-#         "role": "system",
-#         "content": "Im PupAI, assistant at uberpepolis channel"
-#
-#     })
-#
-#
-# async def pupai(message):
-#     try:
-#
-#         update(messages, 'user', message.text)
-#
-#         response = openai.ChatCompletion.create(
-#
-#             model="gpt-3.5-turbo-16k",
-#
-#             messages=messages,
-#
-#             max_tokens=max_token_count,
-#
-#         )
-#
-#         if response['usage']['total_tokens'] >= max_token_count:
-#             await message.answer(
-#
-#                 f'В данный момент вы использовали максимум токенов в рамках контекста:
-#                 {response["usage"]["total_tokens"]}, будет произведена очистка памяти')
-#
-#             reset_messages()
-#
-#         await message.answer(response['choices'][0]['message']['content'], parse_mode="HTML")
-#
-#     except Exception:
-#         await exception()
 
 
 async def send_video(message, video_name):
