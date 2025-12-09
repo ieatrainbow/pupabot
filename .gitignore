@@ -1,7 +1,7 @@
 data
-config.py
 __pycache__
 /.idea/vcs.xml
 .idea
 test.py
 .venv
+.env
