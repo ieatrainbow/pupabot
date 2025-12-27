@@ -123,7 +123,7 @@ key_video_names = {
 
 key_names = {
     r'(\bп.п\s*з.йди\s*|\bх.хл.\s*спросим)': send_random_quote,
-    r'(\bп.п\s*м.др.сть)': services.wisdom_create,
+    r'(\bп.п\s*м.др.сть)': lambda bot, msg: services.wisdom_create(bot, msg.chat.id),
     r'(\bп.зици.\s*техника)': technik_quote,
     r'(\bр\s*[ао]\s*с\s*и\s*я)': russia,
     r'(\bп\s*а\s*б\s*е\s*д\s*а)|(^😡)': services.enrage,
