@@ -16,7 +16,7 @@ async def on_startup(_):
 
 
 def setup_logging():
-    logfile = f'{config.patch}/log/debug.log'
+    logfile = f'{config.data_folder}/log/debug.log'
     handler = RotatingFileHandler(logfile, maxBytes=5 * 1024 * 1024, backupCount=2)
     
     logging.basicConfig(
@@ -30,7 +30,7 @@ def setup_logging():
 def main():
     setup_logging()
     
-    bot = Bot(token=config.tbtoken)
+    bot = Bot(token=config.tb_token)
     dp = Dispatcher(bot)
     
     handlers.register_handlers(dp)
