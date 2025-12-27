@@ -4,6 +4,7 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /usr/src/app/
 RUN mkdir -p data
+RUN apt update && apt install -y ffmpeg && apt clean && apt autoclean && rm -rf /var/lib/apt/lists/*
 COPY requirements.txt .
 
 RUN pip3 install --no-cache-dir -r requirements.txt
