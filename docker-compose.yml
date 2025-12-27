@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./data:/usr/src/app/data:rw 
+    restart: unless-stopped
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DATA_FOLDER=data
+    env_file:
+      - .env

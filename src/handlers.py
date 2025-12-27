@@ -180,7 +180,7 @@ async def handle_photo_or_video(message: types.Message):
 
 
 async def every_day_wisdom():
-    aioschedule.every().day.at("05:00").do(lambda: services.wisdom_create(None, config.uberpepolis_chat_id))
+    aioschedule.every().day.at("05:00").do(lambda: services.wisdom_create(None, config.UBERPEPOLIS_CHAT_ID))
     while True:
         await aioschedule.run_pending()
         await asyncio.sleep(1)
