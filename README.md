@@ -20,20 +20,25 @@ pupabot/
 ├── .env.example                # Environment variables template
 ├── requirements.txt            # Python dependencies
 ├── README.md                   # This documentation
-├── data/                       # Data directory (mounted into container)
+├── .gitignore                  # Git ignore rules
+├── .dockerignore               # Docker ignore rules
+├── data/                       # Data directory (mounted into container, not exist in this repo)
+│   ├── audio/                  # Audio files for bot
+│   ├── font/                   # Font files
+│   ├── gif/                    # Animated GIFs
+│   ├── log/                    # Application logs
+│   ├── pupaups/                # Pupa-related content
+│   ├── stickers/               # Telegram stickers
 │   ├── text/                   # Bot text files
-│   │   └── pupa_q.txt          # Bot quotes
-│   └── log/                    # Application logs
-├── src/                        # Source code
-│   ├── main.py                 # Entry point
-│   ├── config.py               # Configuration
-│   ├── handlers.py             # Message handlers
-│   ├── services.py             # Bot services
-│   ├── utils.py                # Utilities
-│   └── helpers.py              # Helper functions
-└── scripts/                    # Helper scripts
-    ├── run.sh                  # Launch script (Linux/Mac)
-    └── run.ps1                 # Launch script (Windows)
+│   └── video/                  # Video content
+└── src/                        # Source code
+    ├── main.py                 # Entry point - bot initialization and startup
+    ├── ai.py                   # AI integration (not working)
+    ├── config.py               # Configuration management and environment validation
+    ├── handlers.py             # Telegram message handlers and command processors
+    ├── services.py             # Business logic and external service integrations
+    ├── utils.py                # Utility functions and helpers
+    ├── helpers.py              # Helper classes and bot initialization
 ```
 
 ## ⚙️ Configuration
