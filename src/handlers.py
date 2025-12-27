@@ -184,10 +184,13 @@ async def every_day_wisdom():
     while True:
         await aioschedule.run_pending()
         await asyncio.sleep(1)
-
+        
+async def speech_to_text_wrapper(message: types.Message):
+    """Обертка для speech_to_text"""
+    await services.speech_to_text(message.bot, message)
 
 def register_handlers(dp: Dispatcher):
     dp.register_message_handler(process_message, content_types=['text'])
     dp.register_message_handler(send_mp3, content_types=['sticker'])
     dp.register_message_handler(handle_photo_or_video, content_types=['photo', 'video'])
-    dp.register_message_handler(services.speech_to_text, content_types=['voice', 'video_note'])
+    dp.register_message_handler(speech_to_text_wrapper, content_types=['voice', 'video_note'])
