@@ -9,10 +9,11 @@ import config
 import handlers
 import utils
 
+bot = Bot(token=config.tb_token)
 
 async def on_startup(_):
     await utils.load_quotes()
-    asyncio.create_task(handlers.every_day_wisdom())
+    asyncio.create_task(handlers.every_day_wisdom(bot))
 
 
 def setup_logging():
