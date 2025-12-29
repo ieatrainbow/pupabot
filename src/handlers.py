@@ -179,11 +179,16 @@ async def handle_photo_or_video(message: types.Message):
         await send_sticker(message.bot, message)
 
 
-async def every_day_wisdom():
-    aioschedule.every().day.at("05:00").do(lambda: services.wisdom_create(None, config.uberpepolis_chat_id))
+async def every_day_wisdom(bot):
+    
+    async def send_daily_wisdom():
+        await services.wisdom_create(bot, config.uberpepolis_chat_id)
+    
+    aioschedule.every().day.at("09:00").do(lambda: asyncio.create_task(send_daily_wisdom()))
+    
     while True:
         await aioschedule.run_pending()
-        await asyncio.sleep(1)
+        await asyncio.sleep(60) 
         
 async def speech_to_text_wrapper(message: types.Message):
     """Обертка для speech_to_text"""
