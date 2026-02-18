@@ -11,5 +11,6 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - DATA_FOLDER=data
+      - AI_ENABLED=true
     env_file:
       - .env

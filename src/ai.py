@@ -65,5 +65,5 @@ async def pupai(message_text, user_id):
     except Exception as e:
         if response:
             print(f"DEBUG FULL RESPONSE: {response}")
-        print(f"Я В ЗАТУПЕ: {e}")
-        return f"❌ ААА: {str(e)}"
+        print(f"Я УСТАЛ: {e}")
+        return f"❌ Я УСТАЛ: {str(e)}"
