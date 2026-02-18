@@ -1,17 +1,18 @@
 import random
 import re
 import asyncio
+import ai
 from functools import partial
 
 import aioschedule
 from aiogram import Dispatcher, types
+from aiogram.dispatcher.handler import CancelHandler
 from transliterate import translit
 
 import config
 import services
 import utils
 from helpers import exception
-
 
 async def send_random_quote(bot, message):
     try:
@@ -136,6 +137,31 @@ key_functions = {**{key: partial(send_video, video_name=value) for key, value in
 
 
 async def process_message(message: types.Message):
+    # --- pojiloe ai ---
+    if config.AI_ENABLED:
+        try:
+            bot_info = await message.bot.get_me()
+            bot_username = f"@{bot_info.username}"
+            
+            is_mentioned = bot_username in (message.text or "")
+            is_reply_to_bot = (
+                message.reply_to_message and 
+                message.reply_to_message.from_user.id == bot_info.id
+            )
+
+            if is_mentioned or is_reply_to_bot:
+                clean_text = message.text.replace(bot_username, "").strip()
+                if clean_text:
+                    await message.bot.send_chat_action(message.chat.id, 'typing')
+                    answer = await ai.pupai(clean_text, message.from_user.id)
+                    if answer:
+                        await message.reply(answer, parse_mode="HTML")
+                        return 
+        except Exception as e:
+            print(f"AI Feature error (maybe GLM down): {e}")
+    
+    # --- end of pupaingelion ---
+
     rand = random.randrange(30)
     regex_condition_met = False
     

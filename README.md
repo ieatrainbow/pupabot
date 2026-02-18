@@ -115,6 +115,7 @@ docker run -d \
   --restart unless-stopped \
   -v $(pwd)/data:/usr/src/app/data:rw \
   -e DATA_FOLDER=data \
+  -e AI_ENABLED=true \
   --env-file .env \
   pupabot
 ```

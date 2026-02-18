@@ -14,6 +14,8 @@ def check_env():
 
 check_env()
 
+AI_ENABLED = os.getenv('AI_ENABLED', 'false').lower() == 'true'
+
 #environment variables
 tb_token = os.getenv("TB_TOKEN")
 major_id = os.getenv("MAJOR_ID")
@@ -23,7 +25,7 @@ nick_id = os.getenv("NICK_ID")
 test_chat_id = os.getenv("TEST_CHAT_ID")
 test_chat_id_2 = os.getenv("TEST_CHAT_ID_2")
 uberpepolis_chat_id = os.getenv("UBERPEPOLIS_CHAT_ID")
-openai_token = os.getenv("OPENAI_TOKEN")
+ai_token = os.getenv("AI_TOKEN")
 debug_chat = os.getenv("DEBUG_CHAT_ID")
 
 data_folder = os.getenv("DATA_FOLDER")
