@@ -8,12 +8,15 @@ from aiogram.utils import executor
 import config
 import handlers
 import utils
+import reminder
 
 bot = Bot(token=config.tb_token)
 
-async def on_startup(_):
+async def on_startup(dp: Dispatcher):
     await utils.load_quotes()
-    asyncio.create_task(handlers.every_day_wisdom(bot))
+    # Запускаем через глобальный bot или dp.bot
+    asyncio.create_task(handlers.every_day_wisdom(dp.bot))
+    asyncio.create_task(reminder.reminder_cron(dp.bot))
 
 
 def setup_logging():
