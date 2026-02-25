@@ -12,5 +12,6 @@ services:
       - PYTHONUNBUFFERED=1
       - DATA_FOLDER=data
       - AI_ENABLED=true
+      - TZ=Europe/Moscow
     env_file:
       - .env

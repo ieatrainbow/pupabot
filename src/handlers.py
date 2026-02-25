@@ -13,6 +13,7 @@ import config
 import services
 import utils
 from helpers import exception
+import reminder
 
 async def send_random_quote(bot, message):
     try:
@@ -135,6 +136,21 @@ key_names = {
 key_functions = {**{key: partial(send_video, video_name=value) for key, value in key_video_names.items()},
                  **key_names}
 
+async def set_reminder_handler(message: types.Message):
+    # Достаем аргументы после команды /reminder (например, "22:00")
+    args = message.get_args()
+    
+    if not args or ":" not in args:
+        return await message.reply("малыш наш пиши время нормально типа /reminder 22:00 жэс")
+
+    # Сохраняем в список напоминаний (в файл через reminder.py)
+    reminder.add_reminder(args)
+    
+    # Показываем текущую очередь
+    current_list = ", ".join(reminder.get_reminders())
+    
+    await message.reply(f"записал на {args} жэс\nсейчас в очереди: {current_list}")
+
 
 async def process_message(message: types.Message):
     # --- pojiloe ai ---
@@ -161,6 +177,10 @@ async def process_message(message: types.Message):
             print(f"AI Feature error (maybe GLM down): {e}")
     
     # --- end of pupaingelion ---
+
+    # ЗАПОМИНАЕМ ГЛЭКА В ПАМЯТЬ
+    if message.from_user.username:
+        reminder.update_members(message.from_user.username)
 
     rand = random.randrange(30)
     regex_condition_met = False
@@ -221,6 +241,7 @@ async def speech_to_text_wrapper(message: types.Message):
     await services.speech_to_text(message.bot, message)
 
 def register_handlers(dp: Dispatcher):
+    dp.register_message_handler(set_reminder_handler, commands=['reminder'])
     dp.register_message_handler(process_message, content_types=['text'])
     dp.register_message_handler(send_mp3, content_types=['sticker'])
     dp.register_message_handler(handle_photo_or_video, content_types=['photo', 'video'])
