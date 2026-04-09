@@ -16,6 +16,7 @@ check_env()
 
 #ai config envs
 AI_ENABLED = os.getenv('AI_ENABLED', 'false').lower() == 'true'
+ai_api_url = os.getenv("AI_API_URL")
 ai_token = os.getenv("AI_TOKEN")
 ai_model = os.getenv("AI_MODEL")
 ai_max_tokens = int(os.getenv("AI_MAX_TOKENS", "4096"))

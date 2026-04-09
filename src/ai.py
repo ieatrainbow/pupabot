@@ -2,13 +2,13 @@ from openai import AsyncOpenAI
 import config
 import os
 import json
-from config import data_folder, ai_max_tokens, ai_temperature, ai_presence_penalty, ai_model
+from config import data_folder, ai_max_tokens, ai_temperature, ai_presence_penalty, ai_model, ai_api_url
 
 PROMPT_PATH = f'{data_folder}/ai/prompts.json'
 
 client = AsyncOpenAI(
     api_key=config.ai_token, 
-    base_url="https://api.z.ai/api/paas/v4/"    
+    base_url=ai_api_url    
 )
 
 def load_system_prompt():
