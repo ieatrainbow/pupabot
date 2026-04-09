@@ -2,7 +2,7 @@ from openai import AsyncOpenAI
 import config
 import os
 import json
-from config import data_folder
+from config import data_folder, ai_max_tokens, ai_temperature, ai_presence_penalty, ai_model
 
 PROMPT_PATH = f'{data_folder}/ai/prompts.json'
 
@@ -46,11 +46,11 @@ async def pupai(message_text, user_id):
     response = None
     try:
         response = await client.chat.completions.create(
-            model="glm-4.7-flash",
+            model=ai_model,
             messages=context,
-            temperature=1.1,
-            max_tokens=4096,
-            presence_penalty=1.0 
+            temperature=ai_temperature,
+            max_tokens=ai_max_tokens,
+            presence_penalty=ai_presence_penalty 
         )
 
         answer = response.choices[0].message.content # Для GLM-4 часто работает индекс [0]
