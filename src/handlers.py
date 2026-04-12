@@ -141,7 +141,7 @@ async def set_reminder_handler(message: types.Message):
     args = message.get_args()
     
     if not args or ":" not in args:
-        return await message.reply("малыш наш пиши время нормально типа /reminder 22:00 жэс")
+        return await message.reply("малыш наш пиши время нормально типа /reminder 22:00")
 
     # Сохраняем в список напоминаний (в файл через reminder.py)
     reminder.add_reminder(args)
@@ -149,7 +149,7 @@ async def set_reminder_handler(message: types.Message):
     # Показываем текущую очередь
     current_list = ", ".join(reminder.get_reminders())
     
-    await message.reply(f"записал на {args} жэс\nсейчас в очереди: {current_list}")
+    await message.reply(f"записал на {args} хыы\n\nнапомню в: {current_list}")
 
 
 async def process_message(message: types.Message):
