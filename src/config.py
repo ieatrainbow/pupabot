@@ -36,3 +36,4 @@ debug_chat = os.getenv("DEBUG_CHAT_ID")
 
 #bot envs
 data_folder = os.getenv("DATA_FOLDER")
+call_link = os.getenv("CALL_LINK")

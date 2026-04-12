@@ -4,7 +4,7 @@ import asyncio
 import datetime
 import logging
 import config
-from config import data_folder
+from config import data_folder, call_link
 
 REMINDER_FILE = f"{data_folder}/reminders.json"
 
@@ -61,7 +61,8 @@ async def reminder_cron(bot):
                 text = (
                     f"🚨 **БОЖЕ** 🚨\n\n"
                     f"МАЛЫШИ НАШИ ПОДЪЕМ: {tags}\n\n"
-                    f"ВРЕМЯ {now} ПЛЮС МИНУС"
+                    f"ВРЕМЯ {now} ПЛЮС МИНУС\n\n"
+                    f"ПОЖИЛАЯ КОНФЕРЕНЦИЯ: {call_link}"
                 )
                 
                 # ОТПРАВКА
